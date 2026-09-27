@@ -62,23 +62,26 @@
             <tr>
                 <th style="width: 4%;">No</th>
                 <th style="width: 12%;">NIM</th>
-                <th style="width: 22%;">Nama Mahasiswa</th>
-                <th style="width: 12%;">Prodi</th>
-                <th style="width: 16%;">Nama Kelompok</th>
+                <th style="width: 20%;">Nama Mahasiswa</th>
+                <th style="width: 10%;">Prodi</th>
+                <th style="width: 14%;">Nama Kelompok</th>
                 <th style="width: 14%;">Mitra</th>
-                <th style="width: 8%;">Mitra (60%)</th>
-                <th style="width: 8%;">DPL (40%)</th>
+                <th style="width: 7%;">Mitra (60%)</th>
+                <th style="width: 7%;">DPL (40%)</th>
                 <th style="width: 7%;">Nilai Akhir</th>
                 <th style="width: 5%;">Grade</th>
+                <th style="width: 7%;">Status</th>
             </tr>
         </thead>
         <tbody>
             @foreach($mahasiswaList as $idx => $mhs)
                 @php
                     $p = $mhs->penilaian;
-                    $mitra = $p ? $p->total_nilai_mitra : null;
-                    $dpl = $p ? $p->total_nilai_dpl : null;
-                    $nilaiAkhir = ($mitra !== null && $dpl !== null) ? round(($mitra * 0.60) + ($dpl * 0.40), 2) : null;
+                    $status = match (true) {
+                        (bool) $p?->isLocked() => 'Final',
+                        $p?->nilai_akhir !== null => 'Draft',
+                        default => '-',
+                    };
                 @endphp
                 <tr>
                     <td class="text-center">{{ $idx + 1 }}</td>
@@ -87,10 +90,11 @@
                     <td class="text-center">{{ $mhs->prodi }}</td>
                     <td>{{ $mhs->kelompok->nama_kelompok ?? '-' }}</td>
                     <td>{{ $mhs->kelompok->mitra->nama_mitra ?? '-' }}</td>
-                    <td class="text-center">{{ $mitra ?? '-' }}</td>
-                    <td class="text-center">{{ $dpl ?? '-' }}</td>
-                    <td class="text-center font-bold">{{ $nilaiAkhir ?? '-' }}</td>
-                    <td class="text-center font-bold">{{ $p->nilai_huruf ?? '-' }}</td>
+                    <td class="text-center">{{ $p?->nilai_mitra !== null ? number_format($p->nilai_mitra, 2) : '-' }}</td>
+                    <td class="text-center">{{ $p?->nilai_dpl !== null ? number_format($p->nilai_dpl, 2) : '-' }}</td>
+                    <td class="text-center font-bold">{{ $p?->nilai_akhir !== null ? number_format($p->nilai_akhir, 2) : '-' }}</td>
+                    <td class="text-center font-bold">{{ $p?->nilai_huruf ?? '-' }}</td>
+                    <td class="text-center">{{ $status }}</td>
                 </tr>
             @endforeach
         </tbody>

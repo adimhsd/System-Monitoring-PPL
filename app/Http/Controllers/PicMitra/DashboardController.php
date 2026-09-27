@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\KegiatanHarian;
 use App\Models\KelompokPpl;
 use App\Models\Mitra;
+use App\Services\PenilaianService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,7 @@ class DashboardController extends Controller
         $pic = Auth::user();
         $mitra = Mitra::where('pic_user_id', $pic->id)->first();
         
-        $kelompok = $mitra ? KelompokPpl::with(['ketua', 'anggota', 'dpl', 'penilaian'])
+        $kelompok = $mitra ? KelompokPpl::with(['ketua', 'anggota.penilaian', 'dpl'])
             ->where('mitra_id', $mitra->id)
             ->first() : null;
 
@@ -31,7 +32,7 @@ class DashboardController extends Controller
         $approvedMitraCount = (clone $logbookQuery)->where('dilihat_mitra', true)->count();
 
         // Penilaian Status (60%)
-        $penilaianMitraDone = $kelompok->penilaian && $kelompok->penilaian->mitra_nilai_total !== null;
+        $penilaianMitraDone = PenilaianService::kelompokSelesai($kelompok, 'nilai_mitra');
 
         // Recent 5 pending logbooks needing PIC Mitra approval
         $recentPendingLogbooks = (clone $logbookQuery)

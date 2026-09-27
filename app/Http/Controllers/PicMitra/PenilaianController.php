@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\KelompokPpl;
 use App\Models\Mitra;
 use App\Models\PenilaianPpl;
+use App\Services\PenilaianService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,76 +17,69 @@ class PenilaianController extends Controller
      */
     public function index()
     {
-        $picUser = Auth::user();
-        $mitra = Mitra::where('pic_user_id', $picUser->id)->first();
+        $mitra = Mitra::where('pic_user_id', Auth::id())->first();
 
-        if (! $mitra) {
-            return view('pic.penilaian.index', ['kelompokList' => collect()]);
-        }
+        $kelompokList = $mitra
+            ? KelompokPpl::with(['anggota.penilaian', 'dpl', 'ketua'])
+                ->where('mitra_id', $mitra->id)
+                ->where('status', 'aktif')
+                ->get()
+            : collect();
 
-        $kelompokList = KelompokPpl::with(['anggota.penilaian', 'dpl', 'ketua'])
-            ->where('mitra_id', $mitra->id)
-            ->where('status', 'aktif')
-            ->get();
+        $skalaHuruf = PenilaianPpl::skalaNilaiHuruf();
 
-        return view('pic.penilaian.index', compact('kelompokList'));
+        return view('pic.penilaian.index', compact('kelompokList', 'skalaHuruf'));
     }
 
     /**
-     * Simpan/Update Penilaian PIC Mitra Per Mahasiswa (Bobot 60%).
+     * Simpan/Update Nilai Mitra per mahasiswa (Bobot 60%).
+     * Mahasiswa yang nilainya sudah dikunci dilewati.
      */
     public function storeOrUpdate(Request $request, KelompokPpl $kelompok)
     {
-        $picUser = Auth::user();
-        if ($kelompok->mitra->pic_user_id !== $picUser->id) {
+        if ($kelompok->mitra?->pic_user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki hak akses untuk menilai kelompok ini.');
         }
 
         $request->validate([
             'nilai' => ['required', 'array'],
-            'nilai.*.kedisiplinan' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.etika' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.kerjasama' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.hasil_kerja' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.catatan' => ['nullable', 'string'],
+            'nilai.*.nilai_mitra' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'nilai.*.catatan_mitra' => ['nullable', 'string', 'max:1000'],
         ], [
-            'nilai.*.kedisiplinan.required' => 'Skor kedisiplinan & kehadiran wajib diisi (0-100).',
-            'nilai.*.etika.required' => 'Skor etika & sikap kerja wajib diisi (0-100).',
-            'nilai.*.kerjasama.required' => 'Skor kerjasama tim wajib diisi (0-100).',
-            'nilai.*.hasil_kerja.required' => 'Skor kualitas hasil kerja wajib diisi (0-100).',
+            'nilai.*.nilai_mitra.numeric' => 'Nilai Mitra harus berupa angka (0-100).',
+            'nilai.*.nilai_mitra.min' => 'Nilai Mitra minimal 0.',
+            'nilai.*.nilai_mitra.max' => 'Nilai Mitra maksimal 100.',
         ]);
 
+        $anggota = $kelompok->anggota()->with('penilaian')->get()->keyBy('id');
+        $pic = Auth::user();
+        $tersimpan = 0;
+        $dilewati = 0;
+
         foreach ($request->nilai as $anggotaId => $data) {
-            $kedisiplinan = (float) $data['kedisiplinan'];
-            $etika = (float) $data['etika'];
-            $kerjasama = (float) $data['kerjasama'];
-            $hasilKerja = (float) $data['hasil_kerja'];
+            $mhs = $anggota->get((int) $anggotaId);
 
-            $totalMitra = round(($kedisiplinan + $etika + $kerjasama + $hasilKerja) / 4, 2);
-
-            $p = PenilaianPpl::firstOrNew([
-                'anggota_kelompok_id' => $anggotaId,
-                'kelompok_id' => $kelompok->id,
-            ]);
-
-            $p->mitra_skor_kedisiplinan = $kedisiplinan;
-            $p->mitra_skor_etika = $etika;
-            $p->mitra_skor_kerjasama = $kerjasama;
-            $p->mitra_skor_hasil_kerja = $hasilKerja;
-            $p->total_nilai_mitra = $totalMitra;
-            $p->catatan_mitra = $data['catatan'] ?? null;
-            $p->dinilai_at = now();
-
-            // Re-calculate grade if DPL score is present
-            if ($p->total_nilai_dpl !== null) {
-                $nilaiAkhir = round(($totalMitra * 0.60) + ($p->total_nilai_dpl * 0.40), 2);
-                $p->nilai_huruf = PenilaianPpl::konversiNilaiHuruf($nilaiAkhir);
+            if (! $mhs || ($data['nilai_mitra'] ?? null) === null) {
+                continue;
             }
 
-            $p->save();
+            if ($mhs->penilaian?->isLocked()) {
+                $dilewati++;
+                continue;
+            }
+
+            PenilaianService::simpan($mhs, [
+                'nilai_mitra' => $data['nilai_mitra'],
+                'catatan_mitra' => $data['catatan_mitra'] ?? null,
+            ], $pic);
+            $tersimpan++;
         }
 
-        return redirect()->route('pic.penilaian.index')
-            ->with('success', 'Penilaian mahasiswa oleh PIC Mitra (60%) berhasil disimpan.');
+        $pesan = "Nilai Mitra (60%) untuk {$tersimpan} mahasiswa {$kelompok->nama_kelompok} berhasil disimpan.";
+        if ($dilewati > 0) {
+            $pesan .= " {$dilewati} mahasiswa dilewati karena nilainya sudah dikunci.";
+        }
+
+        return redirect()->route('pic.penilaian.index')->with('success', $pesan);
     }
 }

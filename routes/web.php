@@ -108,14 +108,19 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/luaran', [AdminLuaranController::class, 'index'])->name('luaran.index');
 
-            // Penilaian & Config Scale
+            // Input & Rekap Nilai PPL (Draft / Kunci) & Config Scale
             Route::get('/penilaian', [AdminPenilaianController::class, 'index'])->name('penilaian.index');
+            Route::get('/penilaian/export', [AdminPenilaianController::class, 'export'])->name('penilaian.export');
             Route::post('/penilaian/scale', [AdminPenilaianController::class, 'updateGradeScale'])->name('penilaian.scale.update');
+            Route::post('/penilaian/bulk', [AdminPenilaianController::class, 'bulk'])->name('penilaian.bulk');
+            Route::put('/penilaian/{mahasiswa}', [AdminPenilaianController::class, 'update'])->name('penilaian.update');
+            Route::post('/penilaian/{mahasiswa}/lock', [AdminPenilaianController::class, 'lock'])->name('penilaian.lock');
+            Route::post('/penilaian/{mahasiswa}/unlock', [AdminPenilaianController::class, 'unlock'])->name('penilaian.unlock');
 
             // Export & Print PDF / Excel Routes
             Route::get('/export/lembar-nilai-pdf/{kelompok}', [AdminExportController::class, 'downloadLembarNilaiPdf'])->name('export.lembar-nilai.pdf');
             Route::get('/export/rekap-nilai-pdf', [AdminExportController::class, 'downloadRekapNilaiPdf'])->name('export.nilai.pdf');
-            Route::get('/export/nilai-excel', [AdminExportController::class, 'exportNilaiExcel'])->name('export.nilai.excel');
+            Route::get('/export/nilai-excel', [AdminPenilaianController::class, 'export'])->name('export.nilai.excel');
             Route::get('/export/kelompok-excel', [AdminExportController::class, 'exportKelompokExcel'])->name('export.kelompok.excel');
             Route::get('/export/mitra-excel', [AdminExportController::class, 'exportMitraExcel'])->name('export.mitra.excel');
 
@@ -132,10 +137,13 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/logbook/{logbook}/viewed', [DplLogbookController::class, 'markAsViewed'])->name('logbook.viewed');
             Route::get('/luaran', [DplLuaranController::class, 'index'])->name('luaran.index');
 
-            // Penilaian DPL (40%)
+            // Input & Rekap Nilai Laporan DPL (40%)
             Route::get('/penilaian', [DplPenilaianController::class, 'index'])->name('penilaian.index');
+            Route::get('/penilaian/export', [DplPenilaianController::class, 'export'])->name('penilaian.export');
+            Route::post('/penilaian/bulk-lock', [DplPenilaianController::class, 'bulkLock'])->name('penilaian.bulk-lock');
             Route::get('/penilaian/{kelompok}/edit', [DplPenilaianController::class, 'edit'])->name('penilaian.edit');
-            Route::put('/penilaian/{kelompok}', [DplPenilaianController::class, 'update'])->name('penilaian.update');
+            Route::put('/penilaian/{mahasiswa}', [DplPenilaianController::class, 'update'])->name('penilaian.update');
+            Route::post('/penilaian/{mahasiswa}/lock', [DplPenilaianController::class, 'lock'])->name('penilaian.lock');
 
             // Monitoring DPL Kunjungan Lapangan
             Route::resource('monitoring', DplMonitoringController::class);

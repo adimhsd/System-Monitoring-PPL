@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dpl;
 use App\Http\Controllers\Controller;
 use App\Models\KegiatanHarian;
 use App\Models\KelompokPpl;
+use App\Services\PenilaianService;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -13,7 +14,7 @@ class DashboardController extends Controller
     {
         $dpl = Auth::user();
 
-        $kelompokBimbingan = KelompokPpl::with(['mitra.picUser', 'ketua', 'anggota', 'kegiatanHarian', 'penilaian'])
+        $kelompokBimbingan = KelompokPpl::with(['mitra.picUser', 'ketua', 'anggota.penilaian', 'kegiatanHarian'])
             ->where('dpl_id', $dpl->id)
             ->get();
 
@@ -28,10 +29,10 @@ class DashboardController extends Controller
         $totalApprovedDpl = KegiatanHarian::whereIn('kelompok_id', $kelompokIds)->where('dilihat_dpl', true)->count();
         $totalLogbookSubmitted = KegiatanHarian::whereIn('kelompok_id', $kelompokIds)->count();
 
-        // Penilaian DPL Progress
-        $penilaianDoneCount = $kelompokBimbingan->filter(function ($k) {
-            return $k->penilaian && $k->penilaian->dpl_nilai_total !== null;
-        })->count();
+        // Penilaian DPL Progress: kelompok yang seluruh anggotanya sudah diberi Nilai Laporan DPL
+        $penilaianDoneCount = $kelompokBimbingan
+            ->filter(fn ($k) => PenilaianService::kelompokSelesai($k, 'nilai_dpl'))
+            ->count();
 
         // Recent 5 Pending Logbooks needing approval
         $recentPendingLogbooks = (clone $pendingQuery)

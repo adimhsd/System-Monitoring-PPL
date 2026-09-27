@@ -123,7 +123,7 @@
             @php
                 $pendingInKelompok = $kelompok->kegiatanHarian->where('dilihat_dpl', false)->count();
                 $totalLogbookInKelompok = $kelompok->kegiatanHarian->count();
-                $isPenilaianComplete = $kelompok->penilaian && $kelompok->penilaian->dpl_nilai_total !== null;
+                $isPenilaianComplete = \App\Services\PenilaianService::kelompokSelesai($kelompok, 'nilai_dpl');
             @endphp
             <div class="col-12 col-md-6 col-xl-4">
                 <div class="card card-custom p-4 h-100 shadow-sm border-start border-4 border-primary">
@@ -168,7 +168,7 @@
                         <a href="{{ route('dpl.logbook.index', ['kelompok_id' => $kelompok->id]) }}" class="btn btn-sm btn-primary flex-fill fw-semibold rounded-2 fs-8">
                             📘 Lihat Logbook
                         </a>
-                        <a href="{{ route('dpl.penilaian.edit', $kelompok) }}" class="btn btn-sm btn-outline-success flex-fill fw-semibold rounded-2 fs-8">
+                        <a href="{{ route('dpl.penilaian.index', ['kelompok_id' => $kelompok->id]) }}" class="btn btn-sm btn-outline-success flex-fill fw-semibold rounded-2 fs-8">
                             📝 Penilaian
                         </a>
                         <a href="{{ route('dpl.logbook.pdf', $kelompok) }}" class="btn btn-sm btn-outline-danger px-2 rounded-2 fs-8" title="Cetak PDF Logbook">

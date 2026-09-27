@@ -9,42 +9,56 @@ class PenilaianPpl extends Model
 {
     use HasFactory;
 
+    public const BOBOT_MITRA = 0.60;
+
+    public const BOBOT_DPL = 0.40;
+
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_LOCKED = 'locked';
+
+    public const SKALA_DEFAULT = [
+        ['min' => 81.00, 'max' => 100.00, 'huruf' => 'A'],
+        ['min' => 75.00, 'max' => 80.99,  'huruf' => 'AB'],
+        ['min' => 69.00, 'max' => 74.99,  'huruf' => 'B'],
+        ['min' => 63.00, 'max' => 68.99,  'huruf' => 'BC'],
+        ['min' => 57.00, 'max' => 62.99,  'huruf' => 'C'],
+        ['min' => 51.00, 'max' => 56.99,  'huruf' => 'CD'],
+        ['min' => 45.00, 'max' => 50.99,  'huruf' => 'D'],
+        ['min' => 0.00,  'max' => 44.99,  'huruf' => 'E'],
+    ];
+
     protected $table = 'penilaian_ppl';
 
     protected $fillable = [
         'anggota_kelompok_id',
         'kelompok_id',
-        'mitra_skor_kedisiplinan',
-        'mitra_skor_etika',
-        'mitra_skor_kerjasama',
-        'mitra_skor_hasil_kerja',
-        'total_nilai_mitra',
+        'nilai_mitra',
         'catatan_mitra',
-        'dpl_skor_kedisiplinan',
-        'dpl_skor_etika',
-        'dpl_skor_kerjasama',
-        'dpl_skor_hasil_kerja',
-        'total_nilai_dpl',
+        'dinilai_mitra_at',
+        'nilai_dpl',
         'catatan_dpl',
+        'dinilai_dpl_at',
+        'nilai_akhir',
         'nilai_huruf',
-        'dinilai_at',
+        'status',
+        'locked_at',
+        'locked_by',
+    ];
+
+    protected $attributes = [
+        'status' => self::STATUS_DRAFT,
     ];
 
     protected function casts(): array
     {
         return [
-            'mitra_skor_kedisiplinan' => 'decimal:2',
-            'mitra_skor_etika' => 'decimal:2',
-            'mitra_skor_kerjasama' => 'decimal:2',
-            'mitra_skor_hasil_kerja' => 'decimal:2',
-            'total_nilai_mitra' => 'decimal:2',
-            'dpl_skor_kedisiplinan' => 'decimal:2',
-            'dpl_skor_etika' => 'decimal:2',
-            'dpl_skor_kerjasama' => 'decimal:2',
-            'dpl_skor_hasil_kerja' => 'decimal:2',
-            'total_nilai_dpl' => 'decimal:2',
-            'nilai_akhir_angka' => 'decimal:2',
-            'dinilai_at' => 'datetime',
+            'nilai_mitra' => 'float',
+            'nilai_dpl' => 'float',
+            'nilai_akhir' => 'float',
+            'dinilai_mitra_at' => 'datetime',
+            'dinilai_dpl_at' => 'datetime',
+            'locked_at' => 'datetime',
         ];
     }
 
@@ -58,28 +72,60 @@ class PenilaianPpl extends Model
         return $this->belongsTo(KelompokPpl::class, 'kelompok_id');
     }
 
+    public function lockedBy()
+    {
+        return $this->belongsTo(User::class, 'locked_by');
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->status === self::STATUS_LOCKED;
+    }
+
+    public function isLengkap(): bool
+    {
+        return $this->nilai_mitra !== null && $this->nilai_dpl !== null;
+    }
+
+    /**
+     * Nilai Akhir = (Nilai Mitra x 60%) + (Nilai Laporan DPL x 40%).
+     * Hanya dihitung jika kedua sumber nilai sudah terisi.
+     */
+    public static function hitungNilaiAkhir(?float $nilaiMitra, ?float $nilaiDpl): ?float
+    {
+        if ($nilaiMitra === null || $nilaiDpl === null) {
+            return null;
+        }
+
+        return round(($nilaiMitra * self::BOBOT_MITRA) + ($nilaiDpl * self::BOBOT_DPL), 2);
+    }
+
+    public static function skalaNilaiHuruf(): array
+    {
+        return ConfigAplikasi::get('skala_nilai_huruf', self::SKALA_DEFAULT);
+    }
+
     /**
      * Helper Konversi Nilai Angka ke Nilai Huruf berdasarkan Config Aplikasi.
      */
-    public static function konversiNilaiHuruf(float $nilaiAngka): string
+    public static function konversiNilaiHuruf(float $nilaiAngka, ?array $skala = null): string
     {
-        $skala = ConfigAplikasi::get('skala_nilai_huruf', [
-            ['min' => 81.00, 'max' => 100.00, 'huruf' => 'A'],
-            ['min' => 75.00, 'max' => 80.99,  'huruf' => 'AB'],
-            ['min' => 69.00, 'max' => 74.99,  'huruf' => 'B'],
-            ['min' => 63.00, 'max' => 68.99,  'huruf' => 'BC'],
-            ['min' => 57.00, 'max' => 62.99,  'huruf' => 'C'],
-            ['min' => 51.00, 'max' => 56.99,  'huruf' => 'CD'],
-            ['min' => 45.00, 'max' => 50.99,  'huruf' => 'D'],
-            ['min' => 0.00,  'max' => 44.99,  'huruf' => 'E'],
-        ]);
-
-        foreach ($skala as $item) {
+        foreach ($skala ?? self::skalaNilaiHuruf() as $item) {
             if ($nilaiAngka >= $item['min'] && $nilaiAngka <= $item['max']) {
                 return $item['huruf'];
             }
         }
 
         return 'E';
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (PenilaianPpl $penilaian) {
+            $penilaian->nilai_akhir = self::hitungNilaiAkhir($penilaian->nilai_mitra, $penilaian->nilai_dpl);
+            $penilaian->nilai_huruf = $penilaian->nilai_akhir !== null
+                ? self::konversiNilaiHuruf($penilaian->nilai_akhir)
+                : null;
+        });
     }
 }

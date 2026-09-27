@@ -8,8 +8,8 @@ use App\Models\KelompokPpl;
 use App\Models\LuaranKelompok;
 use App\Models\Mahasiswa;
 use App\Models\Mitra;
-use App\Models\PenilaianPpl;
 use App\Models\User;
+use App\Services\PenilaianService;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -33,70 +33,30 @@ class DashboardController extends Controller
             })
             ->get();
 
-        // 1. Rekapitulasi Ringkasan Penilaian PPL Mahasiswa
-        $allPenilaian = PenilaianPpl::all();
-        $totalAnggotaMhs = AnggotaKelompok::count();
-
-        $mhsSudahLengkap = $allPenilaian->filter(function ($p) {
-            return $p->total_nilai_mitra !== null && $p->total_nilai_dpl !== null;
-        })->count();
-        $mhsBelumDinilai = max(0, $totalAnggotaMhs - $mhsSudahLengkap);
+        // 1. Rekapitulasi Ringkasan Penilaian PPL Mahasiswa (Input & Rekap Nilai)
+        $stat = PenilaianService::statistik(PenilaianService::queryMahasiswa(auth()->user()));
 
         $dplSudahCount = KelompokPpl::whereNotNull('dpl_id')
-            ->whereHas('anggota.penilaian', function ($q) {
-                $q->whereNotNull('total_nilai_dpl');
-            })
-            ->pluck('dpl_id')
-            ->unique()
-            ->count();
+            ->whereHas('anggota.penilaian', fn ($q) => $q->whereNotNull('nilai_dpl'))
+            ->distinct()
+            ->count('dpl_id');
 
         $mitraSudahCount = KelompokPpl::whereNotNull('mitra_id')
-            ->whereHas('anggota.penilaian', function ($q) {
-                $q->whereNotNull('total_nilai_mitra');
-            })
-            ->pluck('mitra_id')
-            ->unique()
-            ->count();
-
-        $nilaiAkhirList = [];
-        $rekapHurufCounts = [
-            'A'  => 0,
-            'AB' => 0,
-            'B'  => 0,
-            'BC' => 0,
-            'C'  => 0,
-            'CD' => 0,
-            'D'  => 0,
-            'E'  => 0,
-        ];
-
-        foreach ($allPenilaian as $p) {
-            if ($p->total_nilai_mitra !== null && $p->total_nilai_dpl !== null) {
-                $nilaiAkhir = round(($p->total_nilai_mitra * 0.60) + ($p->total_nilai_dpl * 0.40), 2);
-                $nilaiAkhirList[] = $nilaiAkhir;
-                $huruf = $p->nilai_huruf ?? PenilaianPpl::konversiNilaiHuruf($nilaiAkhir);
-                if (isset($rekapHurufCounts[$huruf])) {
-                    $rekapHurufCounts[$huruf]++;
-                } else {
-                    $rekapHurufCounts[$huruf] = 1;
-                }
-            }
-        }
-
-        $rataRataNilai = count($nilaiAkhirList) > 0
-            ? round(array_sum($nilaiAkhirList) / count($nilaiAkhirList), 2)
-            : 0;
+            ->whereHas('anggota.penilaian', fn ($q) => $q->whereNotNull('nilai_mitra'))
+            ->distinct()
+            ->count('mitra_id');
 
         $rekapPenilaian = [
-            'mhs_sudah' => $mhsSudahLengkap,
-            'mhs_belum' => $mhsBelumDinilai,
-            'total_mhs' => $totalAnggotaMhs,
+            'mhs_sudah' => $stat['mhs_lengkap'],
+            'mhs_belum' => $stat['mhs_belum'],
+            'total_mhs' => $stat['total_mahasiswa'],
+            'terkunci' => $stat['terkunci'],
             'dpl_sudah' => $dplSudahCount,
             'total_dpl' => $totalDpl,
             'mitra_sudah' => $mitraSudahCount,
             'total_mitra' => $totalMitra,
-            'rata_rata' => $rataRataNilai,
-            'huruf' => $rekapHurufCounts,
+            'rata_rata' => $stat['rata_rata'],
+            'huruf' => $stat['rekap_huruf'],
         ];
 
         // 2. Rekapitulasi Ringkasan Luaran Akhir PPL Fakultas

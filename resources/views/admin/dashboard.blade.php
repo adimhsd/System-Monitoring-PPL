@@ -95,6 +95,7 @@
                         <span class="text-muted fs-8 d-block">Sudah Dinilai</span>
                         <strong class="text-success fs-6">{{ $rekapPenilaian['mhs_sudah'] }}</strong>
                         <span class="fs-8 text-muted">/ {{ $rekapPenilaian['total_mhs'] }} Mhs</span>
+                        <span class="d-block fs-8 text-muted">🔒 {{ $rekapPenilaian['terkunci'] }} Final</span>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">

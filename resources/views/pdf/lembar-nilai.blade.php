@@ -129,19 +129,16 @@
             @foreach($kelompok->anggota as $idx => $mhs)
                 @php
                     $p = $mhs->penilaian;
-                    $mitra = $p ? $p->total_nilai_mitra : null;
-                    $dpl = $p ? $p->total_nilai_dpl : null;
-                    $nilaiAkhir = ($mitra !== null && $dpl !== null) ? round(($mitra * 0.60) + ($dpl * 0.40), 2) : null;
                 @endphp
                 <tr>
                     <td class="text-center">{{ $idx + 1 }}</td>
                     <td class="text-center">{{ $mhs->nim }}</td>
                     <td>{{ $mhs->nama }}</td>
                     <td class="text-center">{{ $mhs->prodi }}</td>
-                    <td class="text-center">{{ $mitra ?? '-' }}</td>
-                    <td class="text-center">{{ $dpl ?? '-' }}</td>
-                    <td class="text-center font-bold">{{ $nilaiAkhir ?? '-' }}</td>
-                    <td class="text-center font-bold">{{ $p->nilai_huruf ?? '-' }}</td>
+                    <td class="text-center">{{ $p?->nilai_mitra !== null ? number_format($p->nilai_mitra, 2) : '-' }}</td>
+                    <td class="text-center">{{ $p?->nilai_dpl !== null ? number_format($p->nilai_dpl, 2) : '-' }}</td>
+                    <td class="text-center font-bold">{{ $p?->nilai_akhir !== null ? number_format($p->nilai_akhir, 2) : '-' }}</td>
+                    <td class="text-center font-bold">{{ $p?->nilai_huruf ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>

@@ -3,98 +3,129 @@
 namespace App\Http\Controllers\Dpl;
 
 use App\Http\Controllers\Controller;
+use App\Models\AnggotaKelompok;
 use App\Models\KelompokPpl;
 use App\Models\PenilaianPpl;
+use App\Services\PenilaianService;
+use App\Services\RekapNilaiExportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PenilaianController extends Controller
 {
+    private const FILTERS = ['search', 'prodi', 'kelompok_id', 'status', 'huruf'];
+
     /**
-     * Tampilkan Kelompok Bimbingan DPL untuk Penilaian.
+     * Input & Rekap Nilai mahasiswa bimbingan DPL.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $dplUser = Auth::user();
+        $dpl = Auth::user();
+        $filters = $request->only(self::FILTERS);
 
-        $kelompokList = KelompokPpl::with(['anggota.penilaian', 'mitra.picUser', 'luaran'])
-            ->where('dpl_id', $dplUser->id)
-            ->where('status', 'aktif')
-            ->get();
+        $mahasiswaList = PenilaianService::queryMahasiswa($dpl, $filters)
+            ->orderBy('kelompok_id')
+            ->orderBy('nama')
+            ->paginate(25)
+            ->withQueryString();
 
-        return view('dpl.penilaian.index', compact('kelompokList'));
+        $statsSummary = PenilaianService::statistik(PenilaianService::queryMahasiswa($dpl));
+
+        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->orderBy('nama_kelompok')->get(['id', 'nama_kelompok']);
+
+        $kelompokTerpilih = ! empty($filters['kelompok_id'])
+            ? KelompokPpl::with(['mitra', 'luaran'])->where('dpl_id', $dpl->id)->find($filters['kelompok_id'])
+            : null;
+
+        $skalaHuruf = PenilaianPpl::skalaNilaiHuruf();
+
+        return view('dpl.penilaian.index', compact(
+            'mahasiswaList', 'kelompokList', 'kelompokTerpilih', 'skalaHuruf', 'statsSummary'
+        ));
     }
 
     /**
-     * Form Penilaian DPL Per Mahasiswa.
+     * Tautan lama per kelompok diarahkan ke daftar nilai yang terfilter.
      */
     public function edit(KelompokPpl $kelompok)
     {
-        $dplUser = Auth::user();
-        if ($kelompok->dpl_id !== $dplUser->id) {
-            abort(403, 'Anda tidak memiliki akses ke kelompok ini.');
-        }
+        $this->pastikanBimbingan($kelompok->dpl_id);
 
-        $kelompok->load(['anggota.penilaian', 'mitra', 'luaran']);
-
-        return view('dpl.penilaian.edit', compact('kelompok'));
+        return redirect()->route('dpl.penilaian.index', ['kelompok_id' => $kelompok->id]);
     }
 
     /**
-     * Simpan/Update Penilaian DPL Per Mahasiswa (Bobot 40%).
+     * Simpan Nilai Laporan DPL (Bobot 40%).
      */
-    public function update(Request $request, KelompokPpl $kelompok)
+    public function update(Request $request, AnggotaKelompok $mahasiswa)
     {
-        $dplUser = Auth::user();
-        if ($kelompok->dpl_id !== $dplUser->id) {
-            abort(403, 'Anda tidak memiliki akses ke kelompok ini.');
-        }
+        $this->pastikanBimbingan($mahasiswa->kelompok?->dpl_id);
 
-        $request->validate([
-            'nilai' => ['required', 'array'],
-            'nilai.*.kedisiplinan' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.etika' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.kerjasama' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.hasil_kerja' => ['required', 'numeric', 'min:0', 'max:100'],
-            'nilai.*.catatan' => ['nullable', 'string'],
+        $data = $request->validate([
+            'nilai_dpl' => ['required', 'numeric', 'min:0', 'max:100'],
+            'catatan_dpl' => ['nullable', 'string', 'max:1000'],
+            'status' => ['required', 'in:draft,locked'],
         ], [
-            'nilai.*.kedisiplinan.required' => 'Skor kedisiplinan & kehadiran wajib diisi (0-100).',
-            'nilai.*.etika.required' => 'Skor etika & sikap kerja wajib diisi (0-100).',
-            'nilai.*.kerjasama.required' => 'Skor kerjasama tim wajib diisi (0-100).',
-            'nilai.*.hasil_kerja.required' => 'Skor kualitas hasil kerja wajib diisi (0-100).',
+            'nilai_dpl.required' => 'Nilai Laporan DPL wajib diisi (0-100).',
         ]);
 
-        foreach ($request->nilai as $anggotaId => $data) {
-            $kedisiplinan = (float) $data['kedisiplinan'];
-            $etika = (float) $data['etika'];
-            $kerjasama = (float) $data['kerjasama'];
-            $hasilKerja = (float) $data['hasil_kerja'];
+        $p = PenilaianService::simpan($mahasiswa, $data, Auth::user());
 
-            $totalDpl = round(($kedisiplinan + $etika + $kerjasama + $hasilKerja) / 4, 2);
+        $pesan = $p->nilai_akhir !== null
+            ? "Nilai {$mahasiswa->nama} berhasil diperbarui (Akhir: {$p->nilai_akhir} / Grade: {$p->nilai_huruf})."
+            : "Nilai Laporan DPL {$mahasiswa->nama} tersimpan. Menunggu Nilai Mitra dari PIC Mitra.";
 
-            $p = PenilaianPpl::firstOrNew([
-                'anggota_kelompok_id' => $anggotaId,
-                'kelompok_id' => $kelompok->id,
-            ]);
+        return back()->with('success', $pesan);
+    }
 
-            $p->dpl_skor_kedisiplinan = $kedisiplinan;
-            $p->dpl_skor_etika = $etika;
-            $p->dpl_skor_kerjasama = $kerjasama;
-            $p->dpl_skor_hasil_kerja = $hasilKerja;
-            $p->total_nilai_dpl = $totalDpl;
-            $p->catatan_dpl = $data['catatan'] ?? null;
-            $p->dinilai_at = now();
+    public function lock(AnggotaKelompok $mahasiswa)
+    {
+        $this->pastikanBimbingan($mahasiswa->kelompok?->dpl_id);
 
-            // Calculate final score and grade letter
-            if ($p->total_nilai_mitra !== null) {
-                $nilaiAkhir = round(($p->total_nilai_mitra * 0.60) + ($totalDpl * 0.40), 2);
-                $p->nilai_huruf = PenilaianPpl::konversiNilaiHuruf($nilaiAkhir);
-            }
-
-            $p->save();
+        if (! PenilaianService::kunci($mahasiswa, Auth::user())) {
+            return back()->with('error', "Nilai {$mahasiswa->nama} belum lengkap atau sudah terkunci.");
         }
 
-        return redirect()->route('dpl.penilaian.edit', $kelompok)
-            ->with('success', 'Penilaian mahasiswa oleh DPL berhasil disimpan.');
+        return back()->with('success', "Nilai {$mahasiswa->nama} berhasil dikunci (Final).");
+    }
+
+    /**
+     * Kunci massal nilai mahasiswa bimbingan yang terpilih.
+     */
+    public function bulkLock(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ], [
+            'ids.required' => 'Pilih minimal satu mahasiswa terlebih dahulu.',
+        ]);
+
+        $dpl = Auth::user();
+        $count = 0;
+
+        AnggotaKelompok::with('penilaian')
+            ->whereIn('id', $request->ids)
+            ->whereHas('kelompok', fn ($q) => $q->where('dpl_id', $dpl->id))
+            ->each(function ($mhs) use ($dpl, &$count) {
+                $count += PenilaianService::kunci($mhs, $dpl) ? 1 : 0;
+            });
+
+        return back()->with('success', "{$count} mahasiswa berhasil dikunci. Nilai yang belum lengkap dilewati.");
+    }
+
+    public function export(Request $request)
+    {
+        $dpl = Auth::user();
+        $query = PenilaianService::queryMahasiswa($dpl, $request->only(self::FILTERS));
+
+        return RekapNilaiExportService::download($query, 'DPL: ' . $dpl->nama_lengkap);
+    }
+
+    private function pastikanBimbingan(?int $dplId): void
+    {
+        if ($dplId !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses ke mahasiswa/kelompok ini.');
+        }
     }
 }

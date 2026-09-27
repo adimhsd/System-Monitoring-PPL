@@ -160,7 +160,7 @@
                     <span>📍</span> <span>Monitoring DPL</span>
                 </a>
                 <a href="{{ route('admin.penilaian.index') }}" class="sidebar-link {{ request()->routeIs('admin.penilaian.*') ? 'active' : '' }}">
-                    <span>📝</span> <span>Penilaian PPL</span>
+                    <span>📝</span> <span>Input &amp; Rekap Nilai</span>
                 </a>
                 <a href="{{ route('admin.luaran.index') }}" class="sidebar-link {{ request()->routeIs('admin.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
@@ -207,7 +207,7 @@
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
                 <a href="{{ route('dpl.penilaian.index') }}" class="sidebar-link {{ request()->routeIs('dpl.penilaian.*') ? 'active' : '' }}">
-                    <span>📝</span> <span>Penilaian PPL</span>
+                    <span>📝</span> <span>Input &amp; Rekap Nilai</span>
                 </a>
                 <a href="{{ route('dpl.luaran.index') }}" class="sidebar-link {{ request()->routeIs('dpl.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
@@ -223,7 +223,7 @@
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
                 <a href="{{ route('pic.penilaian.index') }}" class="sidebar-link {{ request()->routeIs('pic.penilaian.*') ? 'active' : '' }}">
-                    <span>📝</span> <span>Penilaian Mitra</span>
+                    <span>📝</span> <span>Input Nilai Mitra</span>
                 </a>
                 <a href="{{ route('pedoman.index') }}" class="sidebar-link {{ request()->routeIs('pedoman.*') ? 'active' : '' }}">
                     <span>📖</span> <span>Buku Panduan/Pedoman</span>
@@ -283,7 +283,7 @@
                     <span>📍</span> <span>Monitoring DPL</span>
                 </a>
                 <a href="{{ route('admin.penilaian.index') }}" class="sidebar-link {{ request()->routeIs('admin.penilaian.*') ? 'active' : '' }}">
-                    <span>📝</span> <span>Penilaian PPL</span>
+                    <span>📝</span> <span>Input &amp; Rekap Nilai</span>
                 </a>
                 <a href="{{ route('admin.luaran.index') }}" class="sidebar-link {{ request()->routeIs('admin.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
@@ -330,7 +330,7 @@
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
                 <a href="{{ route('dpl.penilaian.index') }}" class="sidebar-link {{ request()->routeIs('dpl.penilaian.*') ? 'active' : '' }}">
-                    <span>📝</span> <span>Penilaian PPL</span>
+                    <span>📝</span> <span>Input &amp; Rekap Nilai</span>
                 </a>
                 <a href="{{ route('dpl.luaran.index') }}" class="sidebar-link {{ request()->routeIs('dpl.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
@@ -346,7 +346,7 @@
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
                 <a href="{{ route('pic.penilaian.index') }}" class="sidebar-link {{ request()->routeIs('pic.penilaian.*') ? 'active' : '' }}">
-                    <span>📝</span> <span>Penilaian Mitra</span>
+                    <span>📝</span> <span>Input Nilai Mitra</span>
                 </a>
                 <a href="{{ route('pedoman.index') }}" class="sidebar-link {{ request()->routeIs('pedoman.*') ? 'active' : '' }}">
                     <span>📖</span> <span>Buku Panduan/Pedoman</span>
@@ -517,5 +517,7 @@
             setInterval(fetchNotifications, 30000);
         });
     </script>
+
+    @stack('scripts')
 </body>
 </html>

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\KelompokPplExport;
 use App\Exports\MitraExport;
-use App\Exports\NilaiPplExport;
 use App\Http\Controllers\Controller;
 use App\Models\AnggotaKelompok;
 use App\Models\KelompokPpl;
@@ -33,20 +32,16 @@ class ExportController extends Controller
      */
     public function downloadRekapNilaiPdf()
     {
-        $mahasiswaList = AnggotaKelompok::with(['kelompok.mitra', 'kelompok.dpl', 'penilaian'])->get();
+        $mahasiswaList = AnggotaKelompok::with(['kelompok.mitra', 'kelompok.dpl', 'penilaian'])
+            ->whereNotNull('kelompok_id')
+            ->orderBy('kelompok_id')
+            ->orderBy('nim')
+            ->get();
 
         $pdf = Pdf::loadView('pdf.rekap-nilai', compact('mahasiswaList'))
             ->setPaper('a4', 'landscape');
 
         return $pdf->download('Rekapitulasi_Nilai_PPL_FEB_UNIKU.pdf');
-    }
-
-    /**
-     * Export Excel Rekap Nilai PPL.
-     */
-    public function exportNilaiExcel()
-    {
-        return Excel::download(new NilaiPplExport, 'Rekapitulasi_Nilai_PPL_FEB.xlsx');
     }
 
     /**

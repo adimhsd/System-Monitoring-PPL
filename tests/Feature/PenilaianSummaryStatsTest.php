@@ -59,28 +59,19 @@ class PenilaianSummaryStatsTest extends TestCase
         PenilaianPpl::create([
             'anggota_kelompok_id' => $mhs->id,
             'kelompok_id' => $kelompok->id,
-            'mitra_skor_kedisiplinan' => 90,
-            'mitra_skor_etika' => 90,
-            'mitra_skor_kerjasama' => 90,
-            'mitra_skor_hasil_kerja' => 90,
-            'total_nilai_mitra' => 90,
-            'dpl_skor_kedisiplinan' => 85,
-            'dpl_skor_etika' => 85,
-            'dpl_skor_kerjasama' => 85,
-            'dpl_skor_hasil_kerja' => 85,
-            'total_nilai_dpl' => 85,
-            'nilai_huruf' => 'A',
-            'dinilai_at' => now(),
+            'nilai_mitra' => 90,
+            'nilai_dpl' => 85,
+            'status' => 'locked',
         ]);
 
         $response = $this->actingAs($this->admin)->get('/admin/penilaian');
 
         $response->assertStatus(200);
         $response->assertSee('Status Nilai Mhs');
-        $response->assertSee('Penilaian DPL');
-        $response->assertSee('Penilaian PIC Mitra');
+        $response->assertSee('Input Nilai per Sumber');
+        $response->assertSee('Final: 1');
         $response->assertSee('Rata-Rata Nilai PPL');
         $response->assertSee('Distribusi Huruf Mutu Mahasiswa');
-        $response->assertSee('88'); // 90*0.6 + 85*0.4 = 54 + 34 = 88.00
+        $response->assertSee('88.00'); // 90*0.6 + 85*0.4 = 54 + 34 = 88.00
     }
 }
