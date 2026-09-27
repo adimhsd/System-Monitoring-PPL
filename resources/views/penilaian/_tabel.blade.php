@@ -61,6 +61,9 @@
                         </td>
                         <td>
                             <span class="badge bg-light text-dark border">{{ $mhs->kelompok->nama_kelompok ?? '-' }}</span>
+                            @if($mhs->kelompok?->isMbkm())
+                                <span class="badge bg-info text-dark">MBKM</span>
+                            @endif
                             <div class="text-muted fs-8 text-truncate" style="max-width: 220px;" title="{{ $mhs->kelompok->mitra->nama_mitra ?? '-' }}">🏢 {{ $mhs->kelompok->mitra->nama_mitra ?? '-' }}</div>
                         </td>
                         @if($isAdmin)
@@ -110,7 +113,8 @@
                                         data-nilai-dpl="{{ $p?->nilai_dpl }}"
                                         data-catatan-mitra="{{ $p?->catatan_mitra }}"
                                         data-catatan-dpl="{{ $p?->catatan_dpl }}"
-                                        data-status="{{ $p?->status ?? 'draft' }}">
+                                        data-status="{{ $p?->status ?? 'draft' }}"
+                                        data-mbkm="{{ $mhs->kelompok?->isMbkm() ? '1' : '0' }}">
                                     ✏️ Input Nilai
                                 </button>
                             @endif

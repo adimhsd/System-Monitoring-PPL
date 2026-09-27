@@ -235,9 +235,11 @@
                 <a href="{{ route('student.monitoring.index') }}" class="sidebar-link {{ request()->routeIs('student.monitoring.*') ? 'active' : '' }}">
                     <span>📍</span> <span>Kunjungan DPL</span>
                 </a>
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.logbook.index') }}" class="sidebar-link {{ request()->routeIs('student.logbook.*') ? 'active' : '' }}">
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
+                @endunless
                 <a href="{{ route('student.luaran.index') }}" class="sidebar-link {{ request()->routeIs('student.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
                 </a>
@@ -358,9 +360,11 @@
                 <a href="{{ route('student.monitoring.index') }}" class="sidebar-link {{ request()->routeIs('student.monitoring.*') ? 'active' : '' }}">
                     <span>📍</span> <span>Kunjungan DPL</span>
                 </a>
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.logbook.index') }}" class="sidebar-link {{ request()->routeIs('student.logbook.*') ? 'active' : '' }}">
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
+                @endunless
                 <a href="{{ route('student.luaran.index') }}" class="sidebar-link {{ request()->routeIs('student.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
                 </a>
@@ -460,6 +464,16 @@
                 <div class="alert alert-danger alert-dismissible fade show card-custom border-danger mb-4" role="alert">
                     <strong>Error!</strong> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(auth()->user()?->disarankanGantiPassword())
+                <div class="alert alert-info alert-dismissible fade show card-custom border-info mb-4 d-flex flex-column flex-sm-row align-items-sm-center gap-2" role="alert">
+                    <div class="flex-grow-1">
+                        <strong>🔐 Rekomendasi Keamanan:</strong> Anda masih menggunakan password default. Kami menyarankan untuk menggantinya (tidak wajib).
+                    </div>
+                    <a href="{{ route('password.change.form') }}" class="btn btn-sm btn-info text-white fw-semibold text-nowrap me-sm-4">Ganti Password</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
                 </div>
             @endif
 

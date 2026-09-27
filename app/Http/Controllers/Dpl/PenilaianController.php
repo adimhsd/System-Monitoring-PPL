@@ -61,12 +61,21 @@ class PenilaianController extends Controller
     {
         $this->pastikanBimbingan($mahasiswa->kelompok?->dpl_id);
 
-        $data = $request->validate([
+        $rules = [
             'nilai_dpl' => ['required', 'numeric', 'min:0', 'max:100'],
             'catatan_dpl' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', 'in:draft,locked'],
-        ], [
+        ];
+
+        // Kelompok MBKM: Nilai Mitra juga diinput langsung oleh DPL
+        if ($mahasiswa->kelompok->isMbkm()) {
+            $rules['nilai_mitra'] = ['required', 'numeric', 'min:0', 'max:100'];
+            $rules['catatan_mitra'] = ['nullable', 'string', 'max:1000'];
+        }
+
+        $data = $request->validate($rules, [
             'nilai_dpl.required' => 'Nilai Laporan DPL wajib diisi (0-100).',
+            'nilai_mitra.required' => 'Nilai Mitra wajib diisi (0-100) untuk kelompok MBKM.',
         ]);
 
         $p = PenilaianService::simpan($mahasiswa, $data, Auth::user());

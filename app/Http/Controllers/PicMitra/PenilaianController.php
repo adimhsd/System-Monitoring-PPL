@@ -23,6 +23,7 @@ class PenilaianController extends Controller
             ? KelompokPpl::with(['anggota.penilaian', 'dpl', 'ketua'])
                 ->where('mitra_id', $mitra->id)
                 ->where('status', 'aktif')
+                ->nonMbkm()
                 ->get()
             : collect();
 
@@ -39,6 +40,10 @@ class PenilaianController extends Controller
     {
         if ($kelompok->mitra?->pic_user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki hak akses untuk menilai kelompok ini.');
+        }
+
+        if ($kelompok->isMbkm()) {
+            abort(403, 'Nilai Mitra kelompok MBKM diinput langsung oleh DPL.');
         }
 
         $request->validate([

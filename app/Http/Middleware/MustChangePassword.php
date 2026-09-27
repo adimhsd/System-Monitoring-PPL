@@ -15,7 +15,7 @@ class MustChangePassword
     {
         $user = $request->user();
 
-        if ($user && $user->must_change_password) {
+        if ($user && $user->wajibGantiPassword()) {
             if (! $request->routeIs('password.change', 'password.update', 'logout')) {
                 return redirect()->route('password.change')
                     ->with('warning', 'Demi keamanan, Anda wajib mengganti password default saat login pertama kali.');

@@ -29,6 +29,9 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Kelompok MBKM tidak menggunakan logbook harian
+        $isMbkm = $kelompok->isMbkm();
+
         // Summary Stats
         $logbookQuery = KegiatanHarian::where('kelompok_id', $kelompok->id);
         $totalLogbook = (clone $logbookQuery)->count();
@@ -52,7 +55,8 @@ class DashboardController extends Controller
             'approvedDplCount',
             'todayLogbook',
             'recentLogbooks',
-            'luaran'
+            'luaran',
+            'isMbkm'
         ));
     }
 }

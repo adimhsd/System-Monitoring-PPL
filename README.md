@@ -39,6 +39,16 @@ Repositori ini adalah **gabungan** dari [SystemMonitoringPPL](https://github.com
 
 **Status nilai:** *Draft* (masih bisa diubah) → *Final (Terkunci)*. Nilai hanya bisa dikunci jika kedua nilai lengkap, dan nilai terkunci hanya dapat dibuka kembali oleh Admin.
 
+## 🎓 Kelompok Rekognisi PPL MBKM
+
+Kelompok yang mitranya berkategori **MBKM** diperlakukan berbeda karena kegiatannya dilaksanakan di luar kampus:
+- **Tanpa logbook harian**: menu, tombol, dan halaman logbook tidak tersedia untuk akun kelompok MBKM, serta kelompok MBKM tidak masuk peringatan keterlambatan logbook.
+- **Nilai Mitra (60%) diinput langsung oleh DPL** masing-masing bersama Nilai Laporan DPL (40%); PIC Mitra tidak menilai kelompok MBKM.
+
+## 🔐 Ganti Password
+
+Akun **DPL** dan **PIC Mitra** yang masih memakai password default tidak diwajibkan mengganti password saat login pertama; aplikasi hanya menampilkan rekomendasi untuk menggantinya. Role lain tetap diwajibkan.
+
 ---
 
 ## 🛠️ Teknologi yang Digunakan
@@ -90,10 +100,10 @@ Migrasi akan (1) mengubah tabel `penilaian_ppl` ke skema baru dengan tetap mempe
 
 | Akun | Username | Password awal |
 | :--- | :--- | :--- |
-| DPL baru (MBKM) | `DPL_PPL42`, `DPL_PPL43` | `FEB_Tangguh` (wajib ganti saat login) |
+| DPL baru (MBKM) | `DPL_PPL42`, `DPL_PPL43` | `FEB_Tangguh` (disarankan diganti) |
 | Kelompok 79 | `PPL_Kelompok79` | `password123` |
 | 13 Kelompok MBKM | `PPL_Kelompok_MBKM01` s/d `PPL_Kelompok_MBKM13` | `password123` |
-| PIC Mitra baru | `pic_virginia_mahakarya_property`, `pic_mbkm` | `password123` (wajib ganti saat login) |
+| PIC Mitra baru | `pic_virginia_mahakarya_property`, `pic_mbkm` | `password123` (disarankan diganti) |
 
 ### 5. Jalankan Application Server
 ```bash

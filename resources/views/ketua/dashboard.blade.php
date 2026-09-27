@@ -23,20 +23,28 @@
                 </span>
                 <h3 class="fw-bold mb-1">Selamat Datang, {{ $ketua->nama_lengkap }}</h3>
                 <p class="text-white-50 mb-0 fs-7">
-                    Pantau aktivitas harian magang, status persetujuan logbook, serta pelaporan luaran PPL dalam satu panel terintegrasi.
+                    @if($isMbkm)
+                        Pantau data kelompok dan pelaporan luaran PPL MBKM dalam satu panel terintegrasi.
+                    @else
+                        Pantau aktivitas harian magang, status persetujuan logbook, serta pelaporan luaran PPL dalam satu panel terintegrasi.
+                    @endif
                 </p>
             </div>
             <div class="col-12 col-lg-5 text-lg-end">
                 <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    @unless($isMbkm)
                     <a href="{{ route('ketua.logbook.create') }}" class="btn btn-light text-primary fw-bold rounded-3 btn-touch fs-7">
                         ✏️ Input Logbook Hari Ini
                     </a>
+                    @endunless
                     <a href="{{ route('ketua.luaran.index') }}" class="btn btn-outline-light text-white fw-semibold rounded-3 btn-touch fs-7">
                         📁 Upload Luaran Akhir
                     </a>
+                    @unless($isMbkm)
                     <a href="{{ route('ketua.logbook.pdf') }}" class="btn btn-danger text-white fw-semibold rounded-3 btn-touch fs-7" title="Cetak Laporan Logbook PDF">
                         📄 Cetak PDF
                     </a>
+                    @endunless
                 </div>
             </div>
         </div>
@@ -44,7 +52,15 @@
 
     <!-- Alert Logbook Hari Ini -->
     <div class="mb-4">
-        @if($todayLogbook)
+        @if($isMbkm)
+            <div class="alert alert-info d-flex align-items-center gap-2 rounded-3 border-0 shadow-sm p-3 mb-0" role="alert">
+                <span class="fs-4">🎓</span>
+                <div>
+                    <strong class="d-block text-dark fs-7">Kelompok Rekognisi PPL MBKM</strong>
+                    <span class="fs-8 text-muted">Kegiatan MBKM dilaksanakan di luar kampus, sehingga kelompok ini tidak menggunakan logbook harian. Penilaian dilakukan langsung oleh DPL.</span>
+                </div>
+            </div>
+        @elseif($todayLogbook)
             <div class="alert alert-success d-flex align-items-center justify-content-between rounded-3 border-0 shadow-sm p-3 mb-0" role="alert">
                 <div class="d-flex align-items-center gap-2">
                     <span class="fs-4">✅</span>
@@ -75,6 +91,7 @@
 
     <!-- Metric Executive Summary Cards -->
     <div class="row g-3 mb-4">
+        @unless($isMbkm)
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card card-custom p-3 h-100">
                 <div class="d-flex align-items-center justify-content-between mb-2">
@@ -111,6 +128,8 @@
                 </span>
             </div>
         </div>
+
+        @endunless
 
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card card-custom p-3 h-100">
@@ -222,6 +241,7 @@
     <!-- Row: Logbook Terakhir & Anggota Kelompok -->
     <div class="row g-3">
         <!-- Logbook Terbaru -->
+        @unless($isMbkm)
         <div class="col-12 col-lg-7">
             <div class="card card-custom p-4 h-100">
                 <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
@@ -296,8 +316,10 @@
             </div>
         </div>
 
+        @endunless
+
         <!-- Anggota Kelompok -->
-        <div class="col-12 col-lg-5">
+        <div class="col-12 {{ $isMbkm ? '' : 'col-lg-5' }}">
             <div class="card card-custom p-4 h-100">
                 <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
                     <div class="d-flex align-items-center gap-2">

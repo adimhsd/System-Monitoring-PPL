@@ -165,7 +165,7 @@ Route::middleware(['auth'])->group(function () {
         // Student / Kelompok Role Routes
         Route::middleware(['role:ketua_kelompok'])->prefix('student')->as('student.')->group(function () {
             Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-            Route::resource('logbook', StudentLogbookController::class);
+            Route::resource('logbook', StudentLogbookController::class)->middleware('non.mbkm');
             Route::get('/luaran', [StudentLuaranController::class, 'index'])->name('luaran.index');
             Route::post('/luaran', [StudentLuaranController::class, 'storeOrUpdate'])->name('luaran.store');
 
@@ -177,8 +177,8 @@ Route::middleware(['auth'])->group(function () {
         // Alias for ketua route names
         Route::middleware(['role:ketua_kelompok'])->prefix('ketua')->as('ketua.')->group(function () {
             Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-            Route::get('/logbook-pdf', [LogbookCetakPdfController::class, 'downloadPdf'])->name('logbook.pdf');
-            Route::resource('logbook', StudentLogbookController::class);
+            Route::get('/logbook-pdf', [LogbookCetakPdfController::class, 'downloadPdf'])->name('logbook.pdf')->middleware('non.mbkm');
+            Route::resource('logbook', StudentLogbookController::class)->middleware('non.mbkm');
             Route::get('/luaran', [StudentLuaranController::class, 'index'])->name('luaran.index');
             Route::post('/luaran', [StudentLuaranController::class, 'storeOrUpdate'])->name('luaran.store');
 

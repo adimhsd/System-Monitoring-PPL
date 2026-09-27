@@ -2,7 +2,8 @@
     Modal Input Nilai dengan Live Preview Kalkulasi (diadopsi dari SystemPenilaianPPL).
     Variabel: $role ('admin' | 'dpl'), $skalaHuruf
     - Admin : dapat mengisi Nilai Mitra & Nilai Laporan DPL.
-    - DPL   : mengisi Nilai Laporan DPL; Nilai Mitra berasal dari PIC Mitra (hanya tampil).
+    - DPL   : mengisi Nilai Laporan DPL; Nilai Mitra berasal dari PIC Mitra (hanya tampil),
+              kecuali kelompok MBKM di mana DPL juga mengisi Nilai Mitra.
 --}}
 @php $isAdmin = $role === 'admin'; @endphp
 
@@ -22,13 +23,11 @@
                 <div class="modal-body fs-7">
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="inputNilaiMitra">Nilai Mitra / Lapangan (Bobot 60%)</label>
-                        @if($isAdmin)
-                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="inputNilaiMitra" name="nilai_mitra" placeholder="0 - 100">
-                            <textarea class="form-control form-control-sm mt-2" id="inputCatatanMitra" name="catatan_mitra" rows="1" placeholder="Catatan Mitra (opsional)"></textarea>
-                        @else
-                            <input type="text" class="form-control bg-light" id="inputNilaiMitra" readonly>
-                            <div class="form-text">Nilai Mitra diinput oleh PIC Mitra melalui akunnya.</div>
-                        @endif
+                        <input type="number" step="0.01" min="0" max="100" class="form-control" id="inputNilaiMitra" name="nilai_mitra" placeholder="0 - 100">
+                        <textarea class="form-control form-control-sm mt-2" id="inputCatatanMitra" name="catatan_mitra" rows="1" placeholder="Catatan Mitra (opsional)"></textarea>
+                        @unless($isAdmin)
+                            <div class="form-text" id="helpNilaiMitra"></div>
+                        @endunless
                     </div>
 
                     <div class="mb-3">
@@ -70,6 +69,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const skala = @json($skalaHuruf);
+        const isAdmin = @json($isAdmin);
         const modalEl = document.getElementById('modalInputNilai');
         const form = document.getElementById('formInputNilai');
         const mitra = document.getElementById('inputNilaiMitra');
@@ -110,8 +110,27 @@
                 document.getElementById('modalInputNilaiLabel').textContent = 'Input Nilai: ' + ds.nama + ' (' + ds.nim + ')';
                 document.getElementById('modalInputNilaiDesc').textContent = 'Kelompok: ' + ds.kelompok + ' | Mitra: ' + ds.mitra;
                 mitra.value = ds.nilaiMitra || '';
+
+                // DPL hanya mengisi Nilai Mitra untuk kelompok MBKM
+                if (!isAdmin) {
+                    const mbkm = ds.mbkm === '1';
+                    mitra.readOnly = !mbkm;
+                    mitra.required = mbkm;
+                    mitra.classList.toggle('bg-light', !mbkm);
+                    if (mbkm) {
+                        mitra.setAttribute('name', 'nilai_mitra');
+                        catatanMitra.setAttribute('name', 'catatan_mitra');
+                    } else {
+                        mitra.removeAttribute('name');
+                        catatanMitra.removeAttribute('name');
+                    }
+                    catatanMitra.classList.toggle('d-none', !mbkm);
+                    document.getElementById('helpNilaiMitra').textContent = mbkm
+                        ? 'Kelompok MBKM: Nilai Mitra diinput langsung oleh DPL.'
+                        : 'Nilai Mitra diinput oleh PIC Mitra melalui akunnya.';
+                }
                 dpl.value = ds.nilaiDpl || '';
-                if (catatanMitra) catatanMitra.value = ds.catatanMitra || '';
+                catatanMitra.value = ds.catatanMitra || '';
                 catatanDpl.value = ds.catatanDpl || '';
                 status.value = ds.status || 'draft';
                 hitung();
