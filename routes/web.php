@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\LuaranController as AdminLuaranController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MitraController as AdminMitraController;
 use App\Http\Controllers\Admin\PenilaianController as AdminPenilaianController;
+use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
+use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\Admin\PlottingController as AdminPlottingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
@@ -40,6 +42,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
+});
+
+// Formulir Pendaftaran Publik (tanpa login) — Mahasiswa PPL & DPL
+Route::prefix('pendaftaran')->as('pendaftaran.')->group(function () {
+    Route::get('/', [PendaftaranController::class, 'index'])->name('index');
+    Route::get('/mahasiswa', [PendaftaranController::class, 'formMahasiswa'])->name('mahasiswa');
+    Route::post('/mahasiswa', [PendaftaranController::class, 'simpanMahasiswa'])->name('mahasiswa.simpan')->middleware('throttle:10,1');
+    Route::get('/dpl', [PendaftaranController::class, 'formDpl'])->name('dpl');
+    Route::post('/dpl', [PendaftaranController::class, 'simpanDpl'])->name('dpl.simpan')->middleware('throttle:10,1');
+    Route::get('/selesai', [PendaftaranController::class, 'selesai'])->name('selesai');
 });
 
 // Authentication Routes
@@ -123,6 +135,20 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/export/nilai-excel', [AdminPenilaianController::class, 'export'])->name('export.nilai.excel');
             Route::get('/export/kelompok-excel', [AdminExportController::class, 'exportKelompokExcel'])->name('export.kelompok.excel');
             Route::get('/export/mitra-excel', [AdminExportController::class, 'exportMitraExcel'])->name('export.mitra.excel');
+
+            // Verifikasi Formulir Pendaftaran Mahasiswa PPL & DPL
+            Route::prefix('pendaftaran')->as('pendaftaran.')->group(function () {
+                Route::get('/mahasiswa', [AdminPendaftaranController::class, 'mahasiswa'])->name('mahasiswa');
+                Route::post('/mahasiswa/bulk-terima', [AdminPendaftaranController::class, 'bulkTerimaMahasiswa'])->name('mahasiswa.bulk-terima');
+                Route::get('/mahasiswa/{pendaftaran}/file', [AdminPendaftaranController::class, 'fileMahasiswa'])->name('mahasiswa.file');
+                Route::post('/mahasiswa/{pendaftaran}/terima', [AdminPendaftaranController::class, 'terimaMahasiswa'])->name('mahasiswa.terima');
+                Route::post('/mahasiswa/{pendaftaran}/tolak', [AdminPendaftaranController::class, 'tolakMahasiswa'])->name('mahasiswa.tolak');
+                Route::get('/dpl', [AdminPendaftaranController::class, 'dpl'])->name('dpl');
+                Route::get('/dpl/{pendaftaran}/file', [AdminPendaftaranController::class, 'fileDpl'])->name('dpl.file');
+                Route::post('/dpl/{pendaftaran}/terima', [AdminPendaftaranController::class, 'terimaDpl'])->name('dpl.terima');
+                Route::post('/dpl/{pendaftaran}/tolak', [AdminPendaftaranController::class, 'tolakDpl'])->name('dpl.tolak');
+                Route::post('/{jenis}/toggle', [AdminPendaftaranController::class, 'toggle'])->name('toggle');
+            });
 
             // Monitoring DPL Admin Summary
             Route::get('/monitoring', [AdminMonitoringController::class, 'index'])->name('monitoring.index');

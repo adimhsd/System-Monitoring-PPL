@@ -46,6 +46,20 @@ Kelompok yang mitranya berkategori **MBKM** diperlakukan berbeda karena kegiatan
 - **Tanpa kunjungan monitoring DPL**: menu *Kunjungan DPL* disembunyikan untuk akun kelompok MBKM, kelompok MBKM tidak dapat dipilih pada form kunjungan DPL, dan tidak dihitung dalam rekap monitoring Admin/DPL.
 - **Nilai Mitra (60%) diinput langsung oleh DPL** masing-masing bersama Nilai Laporan DPL (40%); PIC Mitra tidak menilai kelompok MBKM.
 
+## 📨 Formulir Pendaftaran Online (tanpa login)
+
+Halaman publik **`/pendaftaran`** (tautan juga ada di halaman login), seperti Google Form:
+
+| Formulir | URL | Isian | Unggahan |
+| :--- | :--- | :--- | :--- |
+| Mahasiswa PPL | `/pendaftaran/mahasiswa` | Jenis PPL (Reguler / MBKM), NIM, nama, jenis kelamin, prodi, konsentrasi, No. HP/WA, email, alamat; khusus MBKM: program & instansi MBKM | Bukti pembayaran (PDF, maks. 1 MB) |
+| DPL | `/pendaftaran/dpl` | Nama & gelar, NIP/NIDN, No. HP/WA, email | Surat kesanggupan menjadi DPL (PDF, maks. 2 MB) |
+
+Admin memverifikasi di menu **Pendaftaran Mahasiswa** / **Pendaftaran DPL** (lihat PDF → *Terima* / *Tolak*, bisa terima massal):
+- Mahasiswa yang diterima otomatis masuk **Data Mahasiswa** (belum diplot, siap diproses di menu Plotting).
+- DPL yang diterima otomatis dibuatkan **akun DPL** (username `DPL_PPLxx` berikutnya, password awal `FEB_Tangguh`).
+- Admin dapat membuka/menutup masing-masing formulir. NIM/NIP yang sama tidak bisa mendaftar dua kali, kecuali pendaftaran sebelumnya ditolak.
+
 ## 🔐 Ganti Password
 
 Akun **DPL** dan **PIC Mitra** yang masih memakai password default tidak diwajibkan mengganti password saat login pertama; aplikasi hanya menampilkan rekomendasi untuk menggantinya. Role lain tetap diwajibkan.

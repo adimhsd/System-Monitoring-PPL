@@ -141,6 +141,18 @@
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
                 </a>
+                <a href="{{ route('admin.pendaftaran.mahasiswa') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.mahasiswa*') ? 'active' : '' }}">
+                    <span>📝</span> <span>Pendaftaran Mahasiswa</span>
+                    @if(\App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->count() }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('admin.pendaftaran.dpl') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.dpl*') ? 'active' : '' }}">
+                    <span>🧾</span> <span>Pendaftaran DPL</span>
+                    @if(\App\Models\PendaftaranDpl::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranDpl::where('status', 'menunggu')->count() }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.dpl.index') }}" class="sidebar-link {{ request()->routeIs('admin.dpl.*') ? 'active' : '' }}">
                     <span>👨‍🏫</span> <span>Data DPL</span>
                 </a>
@@ -267,6 +279,18 @@
             @if(Auth::user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
+                </a>
+                <a href="{{ route('admin.pendaftaran.mahasiswa') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.mahasiswa*') ? 'active' : '' }}">
+                    <span>📝</span> <span>Pendaftaran Mahasiswa</span>
+                    @if(\App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->count() }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('admin.pendaftaran.dpl') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.dpl*') ? 'active' : '' }}">
+                    <span>🧾</span> <span>Pendaftaran DPL</span>
+                    @if(\App\Models\PendaftaranDpl::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranDpl::where('status', 'menunggu')->count() }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.dpl.index') }}" class="sidebar-link {{ request()->routeIs('admin.dpl.*') ? 'active' : '' }}">
                     <span>👨‍🏫</span> <span>Data DPL</span>

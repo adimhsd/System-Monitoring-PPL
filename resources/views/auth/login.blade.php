@@ -92,6 +92,11 @@
                 Masuk ke Sistem
             </button>
         </form>
+
+        <div class="text-center mt-3 pt-3 border-top fs-7">
+            <span class="text-muted">Belum punya akun?</span>
+            <a href="{{ route('pendaftaran.index') }}" class="fw-semibold text-decoration-none">Daftar PPL (Mahasiswa / DPL)</a>
+        </div>
     </div>
 
     <div class="bg-light p-3 text-center border-top">
