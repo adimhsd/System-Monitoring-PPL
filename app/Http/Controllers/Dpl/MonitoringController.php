@@ -21,7 +21,7 @@ class MonitoringController extends Controller
         $dpl = Auth::user();
 
         // Ambil daftar kelompok bimbingan DPL
-        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->get();
+        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->nonMbkm()->get();
         $kelompokIds = $kelompokList->pluck('id')->toArray();
 
         $query = MonitoringDpl::with(['kelompok.mitra', 'kelompok.ketua'])
@@ -49,13 +49,13 @@ class MonitoringController extends Controller
         $totalKunjungan = MonitoringDpl::where('dpl_user_id', $dpl->id)->count();
 
         // Kunjungan 1 (Penyerahan) completed groups count
-        $penyerahanDoneCount = KelompokPpl::where('dpl_id', $dpl->id)
+        $penyerahanDoneCount = KelompokPpl::where('dpl_id', $dpl->id)->nonMbkm()
             ->whereHas('monitoringDpl', function ($q) {
                 $q->where('jenis_kunjungan', 'penyerahan');
             })->count();
 
         // Kunjungan 2 (Penarikan) completed groups count
-        $penarikanDoneCount = KelompokPpl::where('dpl_id', $dpl->id)
+        $penarikanDoneCount = KelompokPpl::where('dpl_id', $dpl->id)->nonMbkm()
             ->whereHas('monitoringDpl', function ($q) {
                 $q->where('jenis_kunjungan', 'penarikan');
             })->count();
@@ -81,7 +81,7 @@ class MonitoringController extends Controller
     public function create()
     {
         $dpl = Auth::user();
-        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->with('mitra')->orderBy('nama_kelompok')->get();
+        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->nonMbkm()->with('mitra')->orderBy('nama_kelompok')->get();
 
         if ($kelompokList->isEmpty()) {
             return redirect()->route('dpl.monitoring.index')
@@ -97,7 +97,7 @@ class MonitoringController extends Controller
     public function store(Request $request)
     {
         $dpl = Auth::user();
-        $assignedKelompokIds = KelompokPpl::where('dpl_id', $dpl->id)->pluck('id')->toArray();
+        $assignedKelompokIds = KelompokPpl::where('dpl_id', $dpl->id)->nonMbkm()->pluck('id')->toArray();
 
         $request->validate([
             'kelompok_id' => ['required', Rule::in($assignedKelompokIds)],

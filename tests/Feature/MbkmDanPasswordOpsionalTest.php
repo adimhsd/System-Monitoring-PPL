@@ -210,4 +210,33 @@ class MbkmDanPasswordOpsionalTest extends TestCase
             ->assertOk()
             ->assertSee('Kelompok MBKM tanpa logbook harian');
     }
+
+    public function test_mbkm_group_has_no_kunjungan_dpl_menu_or_access(): void
+    {
+        $this->actingAs($this->ketuaMbkm)->get('/ketua/dashboard')->assertDontSee('Kunjungan DPL');
+        $this->actingAs($this->ketuaMbkm)->get('/ketua/monitoring')->assertRedirect('/ketua/dashboard');
+        $this->actingAs($this->ketuaMbkm)->get('/student/monitoring')->assertRedirect('/ketua/dashboard');
+
+        $this->actingAs($this->ketuaReguler)->get('/ketua/dashboard')->assertSee('Kunjungan DPL');
+        $this->actingAs($this->ketuaReguler)->get('/ketua/monitoring')->assertOk();
+    }
+
+    public function test_dpl_cannot_record_kunjungan_for_mbkm_group(): void
+    {
+        $this->actingAs($this->dpl)->get('/dpl/monitoring/create')
+            ->assertOk()
+            ->assertSee('KELOMPOK REGULER')
+            ->assertDontSee('KELOMPOK MBKM - Test');
+
+        $this->actingAs($this->dpl)->post('/dpl/monitoring', [
+            'kelompok_id' => $this->kelompokMbkm->id,
+            'jenis_kunjungan' => 'penyerahan',
+            'tanggal_kunjungan' => now()->toDateString(),
+            'catatan_kunjungan' => 'Kunjungan penyerahan mahasiswa.',
+        ])->assertSessionHasErrors('kelompok_id');
+
+        $this->actingAs($this->admin)->get('/admin/monitoring')
+            ->assertOk()
+            ->assertViewHas('statsSummary', fn ($s) => $s['total_kelompok'] === \App\Models\KelompokPpl::nonMbkm()->count());
+    }
 }

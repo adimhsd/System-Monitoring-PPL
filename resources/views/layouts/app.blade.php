@@ -232,9 +232,11 @@
                 <a href="{{ route('student.dashboard') }}" class="sidebar-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
                 </a>
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.monitoring.index') }}" class="sidebar-link {{ request()->routeIs('student.monitoring.*') ? 'active' : '' }}">
                     <span>📍</span> <span>Kunjungan DPL</span>
                 </a>
+                @endunless
                 @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.logbook.index') }}" class="sidebar-link {{ request()->routeIs('student.logbook.*') ? 'active' : '' }}">
                     <span>📘</span> <span>Logbook Harian</span>
@@ -357,9 +359,11 @@
                 <a href="{{ route('student.dashboard') }}" class="sidebar-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
                 </a>
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.monitoring.index') }}" class="sidebar-link {{ request()->routeIs('student.monitoring.*') ? 'active' : '' }}">
                     <span>📍</span> <span>Kunjungan DPL</span>
                 </a>
+                @endunless
                 @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.logbook.index') }}" class="sidebar-link {{ request()->routeIs('student.logbook.*') ? 'active' : '' }}">
                     <span>📘</span> <span>Logbook Harian</span>

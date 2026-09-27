@@ -148,7 +148,7 @@
                     <!-- Progress Status Badges -->
                     <div class="bg-light p-2 rounded-3 mb-3 fs-8">
                         @if($isMbkm)
-                        <div class="text-muted mb-1">Kelompok MBKM tanpa logbook harian. Nilai Mitra & Nilai Laporan diinput oleh DPL.</div>
+                        <div class="text-muted mb-1">Kelompok MBKM tanpa logbook harian & kunjungan monitoring. Nilai Mitra & Nilai Laporan diinput oleh DPL.</div>
                         @else
                         <div class="d-flex justify-content-between mb-1">
                             <span class="text-muted">Total Logbook:</span>

@@ -43,6 +43,7 @@ Repositori ini adalah **gabungan** dari [SystemMonitoringPPL](https://github.com
 
 Kelompok yang mitranya berkategori **MBKM** diperlakukan berbeda karena kegiatannya dilaksanakan di luar kampus:
 - **Tanpa logbook harian**: menu, tombol, dan halaman logbook tidak tersedia untuk akun kelompok MBKM, serta kelompok MBKM tidak masuk peringatan keterlambatan logbook.
+- **Tanpa kunjungan monitoring DPL**: menu *Kunjungan DPL* disembunyikan untuk akun kelompok MBKM, kelompok MBKM tidak dapat dipilih pada form kunjungan DPL, dan tidak dihitung dalam rekap monitoring Admin/DPL.
 - **Nilai Mitra (60%) diinput langsung oleh DPL** masing-masing bersama Nilai Laporan DPL (40%); PIC Mitra tidak menilai kelompok MBKM.
 
 ## 🔐 Ganti Password

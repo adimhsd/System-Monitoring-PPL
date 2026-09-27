@@ -165,26 +165,30 @@ Route::middleware(['auth'])->group(function () {
         // Student / Kelompok Role Routes
         Route::middleware(['role:ketua_kelompok'])->prefix('student')->as('student.')->group(function () {
             Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-            Route::resource('logbook', StudentLogbookController::class)->middleware('non.mbkm');
+            Route::resource('logbook', StudentLogbookController::class)->middleware('non.mbkm:logbook');
             Route::get('/luaran', [StudentLuaranController::class, 'index'])->name('luaran.index');
             Route::post('/luaran', [StudentLuaranController::class, 'storeOrUpdate'])->name('luaran.store');
 
             // Monitoring DPL Approval by Student
-            Route::get('/monitoring', [StudentMonitoringController::class, 'index'])->name('monitoring.index');
-            Route::post('/monitoring/{monitoring}/approve', [StudentMonitoringController::class, 'approve'])->name('monitoring.approve');
+            Route::middleware('non.mbkm:kunjungan')->group(function () {
+                Route::get('/monitoring', [StudentMonitoringController::class, 'index'])->name('monitoring.index');
+                Route::post('/monitoring/{monitoring}/approve', [StudentMonitoringController::class, 'approve'])->name('monitoring.approve');
+            });
         });
 
         // Alias for ketua route names
         Route::middleware(['role:ketua_kelompok'])->prefix('ketua')->as('ketua.')->group(function () {
             Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-            Route::get('/logbook-pdf', [LogbookCetakPdfController::class, 'downloadPdf'])->name('logbook.pdf')->middleware('non.mbkm');
-            Route::resource('logbook', StudentLogbookController::class)->middleware('non.mbkm');
+            Route::get('/logbook-pdf', [LogbookCetakPdfController::class, 'downloadPdf'])->name('logbook.pdf')->middleware('non.mbkm:logbook');
+            Route::resource('logbook', StudentLogbookController::class)->middleware('non.mbkm:logbook');
             Route::get('/luaran', [StudentLuaranController::class, 'index'])->name('luaran.index');
             Route::post('/luaran', [StudentLuaranController::class, 'storeOrUpdate'])->name('luaran.store');
 
             // Monitoring DPL Approval by Student
-            Route::get('/monitoring', [StudentMonitoringController::class, 'index'])->name('monitoring.index');
-            Route::post('/monitoring/{monitoring}/approve', [StudentMonitoringController::class, 'approve'])->name('monitoring.approve');
+            Route::middleware('non.mbkm:kunjungan')->group(function () {
+                Route::get('/monitoring', [StudentMonitoringController::class, 'index'])->name('monitoring.index');
+                Route::post('/monitoring/{monitoring}/approve', [StudentMonitoringController::class, 'approve'])->name('monitoring.approve');
+            });
         });
 
         // Prefix Root Direct Redirects (e.g. /pic -> /pic/dashboard, /admin -> /admin/dashboard)

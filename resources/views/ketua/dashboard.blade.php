@@ -57,7 +57,7 @@
                 <span class="fs-4">🎓</span>
                 <div>
                     <strong class="d-block text-dark fs-7">Kelompok Rekognisi PPL MBKM</strong>
-                    <span class="fs-8 text-muted">Kegiatan MBKM dilaksanakan di luar kampus, sehingga kelompok ini tidak menggunakan logbook harian. Penilaian dilakukan langsung oleh DPL.</span>
+                    <span class="fs-8 text-muted">Kegiatan MBKM dilaksanakan di luar kampus, sehingga kelompok ini tidak menggunakan logbook harian maupun kunjungan monitoring DPL. Penilaian dilakukan langsung oleh DPL.</span>
                 </div>
             </div>
         @elseif($todayLogbook)

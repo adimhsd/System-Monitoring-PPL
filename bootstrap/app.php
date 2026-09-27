@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'must.change.password' => \App\Http\Middleware\MustChangePassword::class,
-            'non.mbkm' => \App\Http\Middleware\BlockMbkmLogbook::class,
+            'non.mbkm' => \App\Http\Middleware\BlockMbkmFitur::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
