@@ -104,6 +104,7 @@
                 <option value="SKPD" {{ request('kategori') == 'SKPD' ? 'selected' : '' }}>SKPD (Instansi Pemda)</option>
                 <option value="Swasta" {{ request('kategori') == 'Swasta' ? 'selected' : '' }}>Swasta / Perusahaan</option>
                 <option value="UMKM" {{ request('kategori') == 'UMKM' ? 'selected' : '' }}>UMKM</option>
+                <option value="MBKM" {{ request('kategori') == 'MBKM' ? 'selected' : '' }}>MBKM (Rekognisi PPL)</option>
             </select>
         </div>
         <div class="col-12 col-md-3 d-flex gap-2">
@@ -131,7 +132,7 @@
                     <tr>
                         <td class="ps-4 fw-semibold text-dark">{{ $mitra->nama_mitra }}</td>
                         <td>
-                            <span class="badge {{ $mitra->kategori === 'SKPD' ? 'bg-primary' : ($mitra->kategori === 'Swasta' ? 'bg-success' : 'bg-warning text-dark') }} rounded-pill px-3">
+                            <span class="badge {{ $mitra->kategori === 'SKPD' ? 'bg-primary' : ($mitra->kategori === 'Swasta' ? 'bg-success' : ($mitra->kategori === 'MBKM' ? 'bg-info text-dark' : 'bg-warning text-dark')) }} rounded-pill px-3">
                                 {{ $mitra->kategori }}
                             </span>
                         </td>
@@ -171,7 +172,7 @@
         <div class="card card-custom p-3 mb-3">
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <h6 class="fw-bold mb-0 text-dark">{{ $mitra->nama_mitra }}</h6>
-                <span class="badge {{ $mitra->kategori === 'SKPD' ? 'bg-primary' : ($mitra->kategori === 'Swasta' ? 'bg-success' : 'bg-warning text-dark') }}">
+                <span class="badge {{ $mitra->kategori === 'SKPD' ? 'bg-primary' : ($mitra->kategori === 'Swasta' ? 'bg-success' : ($mitra->kategori === 'MBKM' ? 'bg-info text-dark' : 'bg-warning text-dark')) }}">
                     {{ $mitra->kategori }}
                 </span>
             </div>
@@ -227,7 +228,7 @@
                         <ol class="mb-0 ps-3 text-secondary">
                             <li><code>ID Mitra</code> (Dikosongkan saat tambah data baru)</li>
                             <li><code>Nama Mitra Instansi</code> (Wajib)</li>
-                            <li><code>Kategori</code> (SKPD / Swasta / UMKM)</li>
+                            <li><code>Kategori</code> (SKPD / Swasta / UMKM / MBKM)</li>
                             <li><code>Alamat</code> (Opsional)</li>
                             <li><code>Nama PIC Mitra</code> (Wajib)</li>
                             <li><code>Username PIC</code> (Opsional, dibuat otomatis jika kosong)</li>

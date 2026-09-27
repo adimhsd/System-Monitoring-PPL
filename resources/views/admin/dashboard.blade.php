@@ -115,7 +115,7 @@
                 <div class="col-6 col-md-3">
                     <div class="p-2 bg-warning bg-opacity-10 rounded-3 text-center border border-warning border-opacity-20">
                         <span class="text-dark fs-8 d-block fw-semibold">Rata-Rata</span>
-                        <strong class="text-warning fs-6">{{ $rekapPenilaian['rata_rata'] }}</strong>
+                        <strong class="text-warning fs-6">{{ number_format($rekapPenilaian['rata_rata'], 2) }}</strong>
                         <span class="fs-8 text-muted">/ 100</span>
                     </div>
                 </div>

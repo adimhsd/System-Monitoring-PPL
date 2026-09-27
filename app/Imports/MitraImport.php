@@ -23,11 +23,12 @@ class MitraImport implements ToModel, WithHeadingRow
             return null;
         }
 
-        // Normalisasi kategori (SKPD, Swasta, UMKM)
+        // Normalisasi kategori (SKPD, Swasta, UMKM, MBKM)
         $katInput = strtoupper(trim((string) ($row['kategori'] ?? 'SKPD')));
         $kategori = match ($katInput) {
             'SWASTA' => 'Swasta',
             'UMKM' => 'UMKM',
+            'MBKM' => 'MBKM',
             default => 'SKPD',
         };
 

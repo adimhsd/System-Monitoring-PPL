@@ -71,7 +71,7 @@ class MitraController extends Controller
     {
         $request->validate([
             'nama_mitra' => ['required', 'string', 'max:150'],
-            'kategori' => ['required', Rule::in(['SKPD', 'Swasta', 'UMKM'])],
+            'kategori' => ['required', Rule::in(['SKPD', 'Swasta', 'UMKM', 'MBKM'])],
             'alamat' => ['nullable', 'string'],
             'pic_nama' => ['required', 'string', 'max:100'],
             'pic_username' => ['nullable', 'string', 'max:50'],
@@ -138,7 +138,7 @@ class MitraController extends Controller
     {
         $request->validate([
             'nama_mitra' => ['required', 'string', 'max:150'],
-            'kategori' => ['required', Rule::in(['SKPD', 'Swasta', 'UMKM'])],
+            'kategori' => ['required', Rule::in(['SKPD', 'Swasta', 'UMKM', 'MBKM'])],
             'alamat' => ['nullable', 'string'],
             'pic_nama' => ['required', 'string', 'max:100'],
             'pic_username' => ['required', 'string', 'max:50'],

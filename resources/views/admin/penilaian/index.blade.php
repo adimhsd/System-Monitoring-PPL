@@ -75,7 +75,7 @@
                 <span class="fs-4">📊</span>
             </div>
             <h3 class="fw-bold text-warning mb-1">
-                {{ $statsSummary['rata_rata'] }} <span class="fs-7 text-muted fw-normal">/ 100</span>
+                {{ number_format($statsSummary['rata_rata'], 2) }} <span class="fs-7 text-muted fw-normal">/ 100</span>
             </h3>
             <span class="text-muted fs-8">
                 M: {{ $statsSummary['prodi']['Manajemen'] }} | A: {{ $statsSummary['prodi']['Akuntansi'] }} | BD: {{ $statsSummary['prodi']['Bisnis Digital'] }}

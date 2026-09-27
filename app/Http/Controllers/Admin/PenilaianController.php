@@ -143,6 +143,6 @@ class PenilaianController extends Controller
             return "Nilai {$mahasiswa->nama} tersimpan. Nilai Akhir akan terbentuk setelah Nilai Mitra & Nilai DPL lengkap.";
         }
 
-        return "Nilai {$mahasiswa->nama} berhasil diperbarui (Akhir: {$p->nilai_akhir} / Grade: {$p->nilai_huruf}).";
+        return "Nilai {$mahasiswa->nama} berhasil diperbarui (Akhir: " . number_format($p->nilai_akhir, 2) . " / Grade: {$p->nilai_huruf}).";
     }
 }

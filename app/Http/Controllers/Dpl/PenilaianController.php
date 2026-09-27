@@ -72,7 +72,7 @@ class PenilaianController extends Controller
         $p = PenilaianService::simpan($mahasiswa, $data, Auth::user());
 
         $pesan = $p->nilai_akhir !== null
-            ? "Nilai {$mahasiswa->nama} berhasil diperbarui (Akhir: {$p->nilai_akhir} / Grade: {$p->nilai_huruf})."
+            ? "Nilai {$mahasiswa->nama} berhasil diperbarui (Akhir: " . number_format($p->nilai_akhir, 2) . " / Grade: {$p->nilai_huruf})."
             : "Nilai Laporan DPL {$mahasiswa->nama} tersimpan. Menunggu Nilai Mitra dari PIC Mitra.";
 
         return back()->with('success', $pesan);

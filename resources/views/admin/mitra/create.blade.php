@@ -29,6 +29,7 @@
                 <option value="SKPD" {{ old('kategori') == 'SKPD' ? 'selected' : '' }}>SKPD (Instansi Pemda)</option>
                 <option value="Swasta" {{ old('kategori') == 'Swasta' ? 'selected' : '' }}>Swasta / Perusahaan</option>
                 <option value="UMKM" {{ old('kategori') == 'UMKM' ? 'selected' : '' }}>UMKM</option>
+                <option value="MBKM" {{ old('kategori') == 'MBKM' ? 'selected' : '' }}>MBKM (Rekognisi PPL)</option>
             </select>
             @error('kategori')
                 <div class="invalid-feedback fs-7">{{ $message }}</div>

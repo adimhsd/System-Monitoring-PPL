@@ -29,6 +29,7 @@
                 <option value="SKPD" {{ old('kategori', $mitra->kategori) == 'SKPD' ? 'selected' : '' }}>SKPD (Instansi Pemda)</option>
                 <option value="Swasta" {{ old('kategori', $mitra->kategori) == 'Swasta' ? 'selected' : '' }}>Swasta / Perusahaan</option>
                 <option value="UMKM" {{ old('kategori', $mitra->kategori) == 'UMKM' ? 'selected' : '' }}>UMKM</option>
+                <option value="MBKM" {{ old('kategori', $mitra->kategori) == 'MBKM' ? 'selected' : '' }}>MBKM (Rekognisi PPL)</option>
             </select>
         </div>
 
