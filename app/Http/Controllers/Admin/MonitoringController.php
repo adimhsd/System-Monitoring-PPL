@@ -16,7 +16,7 @@ class MonitoringController extends Controller
     public function index(Request $request)
     {
         $dplList = User::where('role', 'dpl')->orderBy('nama_lengkap')->get();
-        $kelompokList = KelompokPpl::orderBy('nama_kelompok')->get();
+        $kelompokList = KelompokPpl::nonMbkm()->orderBy('nama_kelompok')->get();
 
         $query = MonitoringDpl::with(['dpl', 'kelompok.mitra', 'kelompok.ketua']);
 
@@ -54,16 +54,16 @@ class MonitoringController extends Controller
         $monitoringList = $query->latest('tanggal_kunjungan')->paginate(20)->withQueryString();
 
         // Ringkasan Statistik Monitoring Seluruh DPL
-        $totalKelompok = KelompokPpl::count();
+        $totalKelompok = KelompokPpl::nonMbkm()->count();
         $totalKunjungan = MonitoringDpl::count();
 
         // Jumlah Kelompok yang sudah dikunjungi Penyerahan (Kunjungan 1)
-        $penyerahanCompleteCount = KelompokPpl::whereHas('monitoringDpl', function ($q) {
+        $penyerahanCompleteCount = KelompokPpl::nonMbkm()->whereHas('monitoringDpl', function ($q) {
             $q->where('jenis_kunjungan', 'penyerahan');
         })->count();
 
         // Jumlah Kelompok yang sudah dikunjungi Penarikan (Kunjungan 2)
-        $penarikanCompleteCount = KelompokPpl::whereHas('monitoringDpl', function ($q) {
+        $penarikanCompleteCount = KelompokPpl::nonMbkm()->whereHas('monitoringDpl', function ($q) {
             $q->where('jenis_kunjungan', 'penarikan');
         })->count();
 

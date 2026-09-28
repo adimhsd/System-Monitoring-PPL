@@ -8,7 +8,7 @@
         <span class="brand-badge bg-warning text-dark">Keamanan Akun</span>
         <h4 class="fw-bold mb-1">Perbarui Password Akun</h4>
         <p class="mb-0 text-white-50 fs-7">
-            @if(Auth::user()->must_change_password)
+            @if(Auth::user()->wajibGantiPassword())
                 Wajib ganti password default saat login pertama demi keamanan
             @else
                 Perbarui password akun Anda secara berkala
@@ -115,7 +115,7 @@
                 Simpan & Perbarui Password
             </button>
 
-            @if(!Auth::user()->must_change_password)
+            @if(!Auth::user()->wajibGantiPassword())
                 <div class="text-center mt-3">
                     <a href="javascript:history.back()" class="text-decoration-none text-secondary fs-7">
                         &larr; Batal / Kembali

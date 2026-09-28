@@ -124,11 +124,17 @@
                 $pendingInKelompok = $kelompok->kegiatanHarian->where('dilihat_dpl', false)->count();
                 $totalLogbookInKelompok = $kelompok->kegiatanHarian->count();
                 $isPenilaianComplete = \App\Services\PenilaianService::kelompokSelesai($kelompok, 'nilai_dpl');
+                $isMbkm = $kelompok->isMbkm();
             @endphp
             <div class="col-12 col-md-6 col-xl-4">
                 <div class="card card-custom p-4 h-100 shadow-sm border-start border-4 border-primary">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="fw-bold text-primary mb-0 fs-6">{{ $kelompok->nama_kelompok }}</h6>
+                        <h6 class="fw-bold text-primary mb-0 fs-6">
+                            {{ $kelompok->nama_kelompok }}
+                            @if($isMbkm)
+                                <span class="badge bg-info text-dark fs-8 align-middle">MBKM</span>
+                            @endif
+                        </h6>
                         <span class="badge bg-light text-dark border fs-8">TA {{ $kelompok->tahun_akademik }}</span>
                     </div>
 
@@ -141,6 +147,9 @@
 
                     <!-- Progress Status Badges -->
                     <div class="bg-light p-2 rounded-3 mb-3 fs-8">
+                        @if($isMbkm)
+                        <div class="text-muted mb-1">Kelompok MBKM tanpa logbook harian & kunjungan monitoring. Nilai Mitra & Nilai Laporan diinput oleh DPL.</div>
+                        @else
                         <div class="d-flex justify-content-between mb-1">
                             <span class="text-muted">Total Logbook:</span>
                             <span class="fw-bold text-dark">{{ $totalLogbookInKelompok }} entri</span>
@@ -153,6 +162,7 @@
                                 <span class="badge bg-success">✓ 100% Approved</span>
                             @endif
                         </div>
+                        @endif
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Penilaian DPL (40%):</span>
                             @if($isPenilaianComplete)
@@ -165,15 +175,19 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex flex-wrap gap-2 pt-2 border-top mt-auto">
+                        @unless($isMbkm)
                         <a href="{{ route('dpl.logbook.index', ['kelompok_id' => $kelompok->id]) }}" class="btn btn-sm btn-primary flex-fill fw-semibold rounded-2 fs-8">
                             📘 Lihat Logbook
                         </a>
+                        @endunless
                         <a href="{{ route('dpl.penilaian.index', ['kelompok_id' => $kelompok->id]) }}" class="btn btn-sm btn-outline-success flex-fill fw-semibold rounded-2 fs-8">
                             📝 Penilaian
                         </a>
+                        @unless($isMbkm)
                         <a href="{{ route('dpl.logbook.pdf', $kelompok) }}" class="btn btn-sm btn-outline-danger px-2 rounded-2 fs-8" title="Cetak PDF Logbook">
                             📄 PDF
                         </a>
+                        @endunless
                     </div>
                 </div>
             </div>

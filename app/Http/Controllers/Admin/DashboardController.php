@@ -28,6 +28,7 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $kelompokBelumIsiLogbook = KelompokPpl::with(['mitra', 'ketua', 'dpl'])
             ->where('status', 'aktif')
+            ->nonMbkm()
             ->whereDoesntHave('kegiatanHarian', function ($q) use ($today) {
                 $q->where('tanggal', $today->format('Y-m-d'));
             })

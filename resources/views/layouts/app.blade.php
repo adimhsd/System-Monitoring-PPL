@@ -141,6 +141,18 @@
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
                 </a>
+                <a href="{{ route('admin.pendaftaran.mahasiswa') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.mahasiswa*') ? 'active' : '' }}">
+                    <span>📝</span> <span>Pendaftaran Mahasiswa</span>
+                    @if(\App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->count() }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('admin.pendaftaran.dpl') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.dpl*') ? 'active' : '' }}">
+                    <span>🧾</span> <span>Pendaftaran DPL</span>
+                    @if(\App\Models\PendaftaranDpl::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranDpl::where('status', 'menunggu')->count() }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.dpl.index') }}" class="sidebar-link {{ request()->routeIs('admin.dpl.*') ? 'active' : '' }}">
                     <span>👨‍🏫</span> <span>Data DPL</span>
                 </a>
@@ -232,12 +244,16 @@
                 <a href="{{ route('student.dashboard') }}" class="sidebar-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
                 </a>
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.monitoring.index') }}" class="sidebar-link {{ request()->routeIs('student.monitoring.*') ? 'active' : '' }}">
                     <span>📍</span> <span>Kunjungan DPL</span>
                 </a>
+                @endunless
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.logbook.index') }}" class="sidebar-link {{ request()->routeIs('student.logbook.*') ? 'active' : '' }}">
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
+                @endunless
                 <a href="{{ route('student.luaran.index') }}" class="sidebar-link {{ request()->routeIs('student.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
                 </a>
@@ -263,6 +279,18 @@
             @if(Auth::user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
+                </a>
+                <a href="{{ route('admin.pendaftaran.mahasiswa') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.mahasiswa*') ? 'active' : '' }}">
+                    <span>📝</span> <span>Pendaftaran Mahasiswa</span>
+                    @if(\App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranMahasiswa::where('status', 'menunggu')->count() }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('admin.pendaftaran.dpl') }}" class="sidebar-link {{ request()->routeIs('admin.pendaftaran.dpl*') ? 'active' : '' }}">
+                    <span>🧾</span> <span>Pendaftaran DPL</span>
+                    @if(\App\Models\PendaftaranDpl::where('status', 'menunggu')->exists())
+                        <span class="badge bg-warning text-dark ms-auto">{{ \App\Models\PendaftaranDpl::where('status', 'menunggu')->count() }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.dpl.index') }}" class="sidebar-link {{ request()->routeIs('admin.dpl.*') ? 'active' : '' }}">
                     <span>👨‍🏫</span> <span>Data DPL</span>
@@ -355,12 +383,16 @@
                 <a href="{{ route('student.dashboard') }}" class="sidebar-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                     <span>📊</span> <span>Dashboard</span>
                 </a>
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.monitoring.index') }}" class="sidebar-link {{ request()->routeIs('student.monitoring.*') ? 'active' : '' }}">
                     <span>📍</span> <span>Kunjungan DPL</span>
                 </a>
+                @endunless
+                @unless(auth()->user()->kelompokKetua?->isMbkm())
                 <a href="{{ route('student.logbook.index') }}" class="sidebar-link {{ request()->routeIs('student.logbook.*') ? 'active' : '' }}">
                     <span>📘</span> <span>Logbook Harian</span>
                 </a>
+                @endunless
                 <a href="{{ route('student.luaran.index') }}" class="sidebar-link {{ request()->routeIs('student.luaran.*') ? 'active' : '' }}">
                     <span>📂</span> <span>Luaran Akhir PPL</span>
                 </a>
@@ -460,6 +492,16 @@
                 <div class="alert alert-danger alert-dismissible fade show card-custom border-danger mb-4" role="alert">
                     <strong>Error!</strong> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(auth()->user()?->disarankanGantiPassword())
+                <div class="alert alert-info alert-dismissible fade show card-custom border-info mb-4 d-flex flex-column flex-sm-row align-items-sm-center gap-2" role="alert">
+                    <div class="flex-grow-1">
+                        <strong>🔐 Rekomendasi Keamanan:</strong> Anda masih menggunakan password default. Kami menyarankan untuk menggantinya (tidak wajib).
+                    </div>
+                    <a href="{{ route('password.change.form') }}" class="btn btn-sm btn-info text-white fw-semibold text-nowrap me-sm-4">Ganti Password</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
                 </div>
             @endif
 

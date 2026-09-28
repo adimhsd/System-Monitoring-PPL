@@ -20,9 +20,34 @@ class KelompokPpl extends Model
         'status',
     ];
 
+    public const KATEGORI_MBKM = 'MBKM';
+
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'mitra_id');
+    }
+
+    /**
+     * Kelompok Rekognisi PPL MBKM (mitra berkategori MBKM): tanpa logbook harian
+     * dan Nilai Mitra diinput langsung oleh DPL.
+     */
+    public function isMbkm(): bool
+    {
+        if ($this->relationLoaded('mitra') && $this->mitra) {
+            return $this->mitra->kategori === self::KATEGORI_MBKM;
+        }
+
+        return $this->mitra()->withTrashed()->where('kategori', self::KATEGORI_MBKM)->exists();
+    }
+
+    public function scopeMbkm($query)
+    {
+        return $query->whereHas('mitra', fn ($q) => $q->withTrashed()->where('kategori', self::KATEGORI_MBKM));
+    }
+
+    public function scopeNonMbkm($query)
+    {
+        return $query->whereDoesntHave('mitra', fn ($q) => $q->withTrashed()->where('kategori', self::KATEGORI_MBKM));
     }
 
     public function dpl()

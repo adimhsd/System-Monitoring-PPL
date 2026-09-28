@@ -90,7 +90,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         // Cek jika wajib ganti password
-        if ($user->must_change_password) {
+        if ($user->wajibGantiPassword()) {
             return redirect()->route('password.change')
                 ->with('info', 'Selamat datang! Demi keamanan, Anda diwajibkan memperbarui password akun Anda.');
         }

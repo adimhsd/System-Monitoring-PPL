@@ -37,7 +37,7 @@ class LogbookController extends Controller
 
         $logbookList = $query->orderBy('tanggal', 'desc')->paginate(15)->withQueryString();
 
-        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->get();
+        $kelompokList = KelompokPpl::where('dpl_id', $dpl->id)->nonMbkm()->get();
 
         return view('dpl.logbook.index', compact('logbookList', 'kelompokList'));
     }

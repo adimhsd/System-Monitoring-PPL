@@ -37,6 +37,27 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Role yang cukup direkomendasikan (tidak diwajibkan) mengganti password default.
+     */
+    public const ROLE_GANTI_PASSWORD_OPSIONAL = ['dpl', 'pic_mitra'];
+
+    /**
+     * Wajib ganti password sebelum dapat mengakses aplikasi.
+     */
+    public function wajibGantiPassword(): bool
+    {
+        return $this->must_change_password && ! in_array($this->role, self::ROLE_GANTI_PASSWORD_OPSIONAL, true);
+    }
+
+    /**
+     * Masih memakai password default, tetapi hanya direkomendasikan untuk mengganti.
+     */
+    public function disarankanGantiPassword(): bool
+    {
+        return $this->must_change_password && ! $this->wajibGantiPassword();
+    }
+
     public function mitraPic()
     {
         return $this->hasOne(Mitra::class, 'pic_user_id');
