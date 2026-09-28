@@ -693,7 +693,7 @@
                     &copy; {{ date('Y') }} <strong>Fakultas Ekonomi dan Bisnis — Universitas Kuningan</strong>. All rights reserved.
                 </div>
                 <div class="d-flex gap-3">
-                    <span>Developed by <a href="https://adi-muhamad.web.app/" target="_blank" class="text-white text-decoration-none fw-semibold border-bottom border-secondary pb-1">Dosen Sontoloyo</a> with &lt;3 for FEB UNIKU</span>
+                    <span>Developed by <a href="https://adi-muhamad.web.app/" target="_blank" class="text-white text-decoration-none border-bottom border-secondary pb-1">Dosen Sontoloyo</a> with <i class="bi bi-heart-fill text-danger mx-1"></i> for FEB UNIKU</span>
                 </div>
             </div>
         </div>
