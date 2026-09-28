@@ -19,35 +19,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = Hash::make('password');
-
-        // 1. Akun Admin Utama
-        User::create([
-            'username' => 'admin',
-            'password' => $password,
-            'role' => 'admin',
-            'nama_lengkap' => 'Administrator Unit PPL FEB',
-            'no_hp' => '081234567890',
-            'nip_nidn' => '197501012000031001',
-            'must_change_password' => false,
-            'is_active' => true,
-        ]);
-
-        // 2. Config Konversi Skala Nilai Huruf Default
-        ConfigAplikasi::set('skala_nilai_huruf', [
-            ['min' => 81.00, 'max' => 100.00, 'huruf' => 'A'],
-            ['min' => 75.00, 'max' => 80.99,  'huruf' => 'AB'],
-            ['min' => 69.00, 'max' => 74.99,  'huruf' => 'B'],
-            ['min' => 63.00, 'max' => 68.99,  'huruf' => 'BC'],
-            ['min' => 57.00, 'max' => 62.99,  'huruf' => 'C'],
-            ['min' => 51.00, 'max' => 56.99,  'huruf' => 'CD'],
-            ['min' => 45.00, 'max' => 50.99,  'huruf' => 'D'],
-            ['min' => 0.00,  'max' => 44.99,  'huruf' => 'E'],
-        ]);
+        $this->call(SmartMergedDataSeeder::class);
 
         // Jika dipanggil dari PHPUnit test suite, buatkan data pendukung pengujian
         if (app()->environment('testing')) {
-            $this->seedTestFixtureData($password);
+            $this->seedTestFixtureData(Hash::make('password'));
         }
     }
 

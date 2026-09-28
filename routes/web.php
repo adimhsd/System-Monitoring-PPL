@@ -32,6 +32,7 @@ use App\Http\Controllers\LogbookCetakPdfController;
 use App\Http\Controllers\LogbookFotoController;
 use App\Http\Controllers\LuaranFileController as LuaranDownloadController;
 use App\Http\Controllers\NotifikasiController as NotificationController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PedomanController;
 
 use App\Http\Controllers\PicMitra\DashboardController as PicDashboardController;
@@ -40,9 +41,9 @@ use App\Http\Controllers\PicMitra\PenilaianController as PicPenilaianController;
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Public Landing Page & Dashboard Homepage
+Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::get('/index', [LandingController::class, 'index'])->name('landing');
 
 // Formulir Pendaftaran Publik (tanpa login) — Mahasiswa PPL & DPL
 Route::prefix('pendaftaran')->as('pendaftaran.')->group(function () {
@@ -229,6 +230,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/foto-show/{logbook}', [LogbookFotoController::class, 'show'])->name('foto.show');
         Route::get('/luaran/{luaran}/pdf-download', [LuaranDownloadController::class, 'download'])->name('luaran.pdf.download');
         Route::get('/luaran/pdf/{luaran}', [LuaranDownloadController::class, 'download'])->name('luaran.pdf.show');
+        Route::get('/luaran/{luaran}/poster', [LuaranDownloadController::class, 'poster'])->name('luaran.poster.show');
+        Route::get('/luaran/{luaran}/poster-download', [LuaranDownloadController::class, 'poster'])->name('luaran.poster.download');
 
         // Real-Time In-App Notifications API
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

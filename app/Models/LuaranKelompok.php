@@ -15,6 +15,7 @@ class LuaranKelompok extends Model
         'kelompok_id',
         'file_laporan_pdf',
         'url_video',
+        'file_poster',
         'uploaded_at',
     ];
 

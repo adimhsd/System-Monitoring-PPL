@@ -35,18 +35,31 @@ class LuaranController extends Controller
         if ($request->filled('status')) {
             if ($request->status === 'lengkap') {
                 $query->whereHas('luaran', function ($q) {
-                    $q->whereNotNull('file_laporan_pdf')->whereNotNull('url_video');
+                    $q->whereNotNull('file_laporan_pdf')
+                      ->whereNotNull('url_video')
+                      ->whereNotNull('file_poster');
                 });
             } elseif ($request->status === 'parsial') {
                 $query->whereHas('luaran', function ($q) {
                     $q->where(function ($sub) {
-                        $sub->whereNull('file_laporan_pdf')->orWhereNull('url_video');
+                        $sub->whereNull('file_laporan_pdf')
+                            ->orWhereNull('url_video')
+                            ->orWhereNull('file_poster');
                     })->where(function ($sub) {
-                        $sub->whereNotNull('file_laporan_pdf')->orWhereNotNull('url_video');
+                        $sub->whereNotNull('file_laporan_pdf')
+                            ->orWhereNotNull('url_video')
+                            ->orWhereNotNull('file_poster');
                     });
                 });
             } elseif ($request->status === 'belum') {
-                $query->whereDoesntHave('luaran');
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('luaran')
+                      ->orWhereHas('luaran', function ($sub) {
+                          $sub->whereNull('file_laporan_pdf')
+                              ->whereNull('url_video')
+                              ->whereNull('file_poster');
+                      });
+                });
             }
         }
 
@@ -57,12 +70,13 @@ class LuaranController extends Controller
         $luaranList = LuaranKelompok::all();
 
         $kelompokLengkap = $luaranList->filter(function ($l) {
-            return !empty($l->file_laporan_pdf) && !empty($l->url_video);
+            return !empty($l->file_laporan_pdf) && !empty($l->url_video) && !empty($l->file_poster);
         })->count();
 
         $kelompokParsial = $luaranList->filter(function ($l) {
-            return (!empty($l->file_laporan_pdf) && empty($l->url_video))
-                || (empty($l->file_laporan_pdf) && !empty($l->url_video));
+            $hasAny = !empty($l->file_laporan_pdf) || !empty($l->url_video) || !empty($l->file_poster);
+            $hasAll = !empty($l->file_laporan_pdf) && !empty($l->url_video) && !empty($l->file_poster);
+            return $hasAny && !$hasAll;
         })->count();
 
         $kelompokBelum = max(0, $totalKelompok - ($kelompokLengkap + $kelompokParsial));
@@ -77,6 +91,11 @@ class LuaranController extends Controller
         })->count();
         $videoBelum = max(0, $totalKelompok - $videoTerkumpul);
 
+        $posterTerkumpul = $luaranList->filter(function ($l) {
+            return !empty($l->file_poster);
+        })->count();
+        $posterBelum = max(0, $totalKelompok - $posterTerkumpul);
+
         $persentaseProgres = $totalKelompok > 0
             ? round(($kelompokLengkap / $totalKelompok) * 100, 1)
             : 0;
@@ -90,6 +109,8 @@ class LuaranController extends Controller
             'pdf_belum' => $pdfBelum,
             'video_terkumpul' => $videoTerkumpul,
             'video_belum' => $videoBelum,
+            'poster_terkumpul' => $posterTerkumpul,
+            'poster_belum' => $posterBelum,
             'persentase_progres' => $persentaseProgres,
         ];
 

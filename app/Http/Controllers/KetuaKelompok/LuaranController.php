@@ -43,33 +43,52 @@ class LuaranController extends Controller
         $rules = [
             'url_video' => ['required', 'url', 'regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i'],
             'file_laporan_pdf' => [
-                $luaran ? 'nullable' : 'required',
+                $luaran && $luaran->file_laporan_pdf ? 'nullable' : 'required',
                 'file',
                 'mimetypes:application/pdf',
-                'max:10240', // Max 10MB (10240 KB)
+                'max:5120', // Max 5MB (5120 KB)
+            ],
+            'file_poster' => [
+                $luaran && $luaran->file_poster ? 'nullable' : 'required',
+                'file',
+                'image',
+                'mimes:jpeg,jpg,png,webp',
+                'max:3072', // Max 3MB (3072 KB)
             ],
         ];
 
         $messages = [
             'file_laporan_pdf.required' => 'File laporan akhir format PDF wajib diunggah.',
             'file_laporan_pdf.mimetypes' => 'File laporan harus berformat PDF.',
-            'file_laporan_pdf.max' => 'Ukuran file PDF maksimal 10MB.',
+            'file_laporan_pdf.max' => 'Ukuran file PDF maksimal 5MB.',
             'url_video.required' => 'Link URL video YouTube kegiatan PPL wajib diisi.',
             'url_video.url' => 'Format URL video tidak valid.',
             'url_video.regex' => 'Link video harus berasal dari YouTube (youtube.com atau youtu.be).',
+            'file_poster.required' => 'File poster kegiatan wajib diunggah.',
+            'file_poster.image' => 'File poster harus berupa gambar.',
+            'file_poster.mimes' => 'Format poster harus berformat JPG, JPEG, PNG, atau WebP.',
+            'file_poster.max' => 'Ukuran file poster maksimal 3MB.',
         ];
 
         $request->validate($rules, $messages);
 
+        $disk = config('filesystems.disks.r2.key') ? 'r2' : 'local';
         $filePath = $luaran ? $luaran->file_laporan_pdf : null;
+        $posterPath = $luaran ? $luaran->file_poster : null;
 
         if ($request->hasFile('file_laporan_pdf')) {
-            $disk = config('filesystems.disks.r2.key') ? 'r2' : 'local';
-            $fileName = 'luaran/kelompok_' . $kelompok->id . '/laporan_akhir_' . time() . '.pdf';
-            
             $filePath = $request->file('file_laporan_pdf')->storeAs(
                 'luaran/kelompok_' . $kelompok->id,
                 'laporan_akhir_' . time() . '.pdf',
+                $disk
+            );
+        }
+
+        if ($request->hasFile('file_poster')) {
+            $ext = $request->file('file_poster')->getClientOriginalExtension();
+            $posterPath = $request->file('file_poster')->storeAs(
+                'luaran/kelompok_' . $kelompok->id,
+                'poster_kegiatan_' . time() . '.' . $ext,
                 $disk
             );
         }
@@ -79,6 +98,7 @@ class LuaranController extends Controller
             [
                 'file_laporan_pdf' => $filePath,
                 'url_video' => $request->url_video,
+                'file_poster' => $posterPath,
                 'uploaded_at' => now(),
             ]
         );
@@ -88,7 +108,7 @@ class LuaranController extends Controller
             NotifikasiService::kirim(
                 $kelompok->dpl_id,
                 'Luaran Akhir PPL Diunggah',
-                'Kelompok ' . $kelompok->nama_kelompok . ' telah mengunggah Laporan PDF & Link Video YouTube.',
+                'Kelompok ' . $kelompok->nama_kelompok . ' telah mengunggah Laporan PDF, Link Video YouTube, & Poster Kegiatan.',
                 route('dpl.luaran.index')
             );
         }
@@ -97,12 +117,12 @@ class LuaranController extends Controller
             NotifikasiService::kirim(
                 $kelompok->mitra->pic_user_id,
                 'Luaran Akhir PPL Diunggah',
-                'Kelompok ' . $kelompok->nama_kelompok . ' telah mengunggah Laporan PDF & Link Video YouTube.',
+                'Kelompok ' . $kelompok->nama_kelompok . ' telah mengunggah Laporan PDF, Link Video YouTube, & Poster Kegiatan.',
                 route('pic.dashboard')
             );
         }
 
         return redirect()->route('ketua.luaran.index')
-            ->with('success', 'Luaran akhir PPL (Laporan PDF & Link Video YouTube) berhasil disimpan.');
+            ->with('success', 'Luaran akhir PPL (Laporan PDF Max 5MB, Link Video YouTube, & Poster Kegiatan Max 3MB) berhasil disimpan.');
     }
 }

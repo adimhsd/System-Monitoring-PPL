@@ -50,4 +50,51 @@ class LuaranFileController extends Controller
             'Cache-Control' => 'private, max-age=1800',
         ]);
     }
+
+    /**
+     * Stream / View Secure Poster Kegiatan PPL.
+     */
+    public function poster(Request $request, LuaranKelompok $luaran)
+    {
+        $user = Auth::user();
+        $kelompok = $luaran->kelompok;
+
+        // Authorization check: Admin, DPL, PIC Mitra, or Ketua Kelompok
+        $isAuthorized = match ($user->role) {
+            'admin' => true,
+            'dpl' => $kelompok->dpl_id === $user->id,
+            'pic_mitra' => $kelompok->mitra && $kelompok->mitra->pic_user_id === $user->id,
+            'ketua_kelompok' => $kelompok->ketua_user_id === $user->id,
+            default => false,
+        };
+
+        if (! $isAuthorized) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat poster ini.');
+        }
+
+        $filePath = $luaran->file_poster;
+        if (! $filePath) {
+            abort(404, 'File poster kegiatan belum diunggah.');
+        }
+
+        $disk = config('filesystems.disks.r2.key') ? 'r2' : 'local';
+
+        if (! Storage::disk($disk)->exists($filePath)) {
+            if (Storage::disk('local')->exists($filePath)) {
+                $disk = 'local';
+            } else {
+                abort(404, 'File poster tidak ditemukan di penyimpanan.');
+            }
+        }
+
+        $fileContent = Storage::disk($disk)->get($filePath);
+        $mimeType = Storage::disk($disk)->mimeType($filePath) ?? 'image/jpeg';
+        $fileName = 'Poster_PPL_' . \Illuminate\Support\Str::slug($kelompok->nama_kelompok) . '.' . pathinfo($filePath, PATHINFO_EXTENSION);
+
+        return response($fileContent, 200, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+            'Cache-Control' => 'private, max-age=1800',
+        ]);
+    }
 }
